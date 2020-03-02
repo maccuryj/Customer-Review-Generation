@@ -1,2 +1,11 @@
 # Config files
 .vscode
+
+# Latex Files
+*.aux
+*.bbl
+*.blg
+*.log
+*.run.xml
+*.synctex.gz
+*.toc
