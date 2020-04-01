@@ -159,7 +159,7 @@ class UnsupervisedRandomForest(_forest.ForestClassifier):
         plt.title('Estimated number of clusters: %d' % n_clusters_)
         plt.show()
 
-        #def
+
 
 
 
