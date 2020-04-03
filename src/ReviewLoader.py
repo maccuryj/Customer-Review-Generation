@@ -48,8 +48,13 @@ class ProductReviews():
                     self.word2id[word] == len(self.word2id)
 
         encoding_size = len(self.word2id)
-        if "UNK" not in self.word2id.values():
-            self.word2id["UNK"] = encoding_size
+
+        tokens = ["<UNK>", "<SOR>", "<EOR>"]
+        i = 0
+        for tok in tokens:
+            if tok not in self.word2id.values():
+                self.word2id[tok] = encoding_size + i
+                i += 1
 
     def create_decoding(self):
         for word in self.word2id:
@@ -81,24 +86,36 @@ class ReviewDataset(IterableDataset):
 class Collator():
     
     def __init__(self, encoding):
-        self.encoding = encoding    
+        self.encoding = encoding
 
     def __call__(self, batch):
-        encoded_batch = []
-        batch_lengths = []
+        
+        X = []
+        X_len = []
+        Y = []
+        Y_len = []
 
         for line in batch:
             encoded_line = [self.encoding[word] if word in self.encoding.keys()
-            else self.encoding["UNK"]
+            else self.encoding["<UNK>"]
             for word in line.split(' ')]
-            #Do we need One-Hot?
-            encoded_batch.append(one_hot(torch.LongTensor(encoded_line), num_classes=len(self.encoding)-1))
-            batch_lengths.append(len(encoded_line))
+            encoded_line.insert(0, self.encoding["<SOR>"])
+            encoded_line.append(self.encoding["<EOR>"])
+
+            
+            X.append(one_hot(torch.LongTensor(encoded_line[:-1])))            
+            X_len.append(len(encoded_line[:-1]))
+            Y.append(one_hot(torch.LongTensor(encoded_line[1:])))            
+            Y_len.append(len(encoded_line[1:]))
+
+        print(X)
+        X_padded = pad_sequence(X, batch_first=True, padding_value=0)
+        Y_padded = pad_sequence(Y, batch_first=True, padding_value=0)  
+        X_packed = pack_padded_sequence(X_padded, X_len, batch_first=True, enforce_sorted=False)
+        Y_packed = pack_padded_sequence(Y_padded, Y_len, batch_first=True, enforce_sorted=False)
+        return X_packed, X_len, Y_packed, Y_len
         
-        batch_tensor = pad_sequence(encoded_batch, batch_first=True, padding_value=0)
-        padded_batch = pack_padded_sequence(batch_tensor, batch_lengths, batch_first=True, enforce_sorted=False)
-        return padded_batch, batch_lengths
-        
+
 
 
 
