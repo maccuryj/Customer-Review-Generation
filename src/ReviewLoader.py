@@ -107,8 +107,7 @@ class Collator():
             X_len.append(len(encoded_line[:-1]))
             Y.append(one_hot(torch.LongTensor(encoded_line[1:])))            
             Y_len.append(len(encoded_line[1:]))
-
-        print(X)
+        
         X_padded = pad_sequence(X, batch_first=True, padding_value=0)
         Y_padded = pad_sequence(Y, batch_first=True, padding_value=0)  
         X_packed = pack_padded_sequence(X_padded, X_len, batch_first=True, enforce_sorted=False)
