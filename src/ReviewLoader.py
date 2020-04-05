@@ -127,7 +127,7 @@ class ReviewDataset(IterableDataset):
                 yield from line
 
     def get_stream():
-
+        pass
 
     def __iter__(self):
         return self.parse_file()
@@ -137,13 +137,14 @@ class Collator():
     
     def __init__(self, encoding):
         self.encoding = encoding
+        self.dict_size = len(encoding)
 
     def __call__(self, batch):
         
         X = []
         X_len = []
         Y = []
-        Y_len = []
+        #Y_len = []
 
         for line in batch:
             encoded_line = [self.encoding[word.lower()] if word.lower() in self.encoding.keys()
@@ -152,16 +153,20 @@ class Collator():
             encoded_line.insert(0, self.encoding["<SOR>"])
             encoded_line.append(self.encoding["<EOR>"])
             
-            X.append(one_hot(torch.LongTensor(encoded_line[:-1])).float())         
+            x = one_hot(torch.LongTensor(encoded_line[:-1]), num_classes=self.dict_size).float()
+            y = torch.LongTensor(encoded_line[1:])
+
+            X.append(x)         
             X_len.append(len(encoded_line[:-1]))
-            Y.append(torch.LongTensor(encoded_line[1:]))            
-            Y_len.append(len(encoded_line[1:]))
+            Y.append(y)            
+            #Y_len.append(len(encoded_line[1:]))
         
         X_padded = pad_sequence(X, batch_first=True, padding_value=0)
         Y_padded = pad_sequence(Y, batch_first=True, padding_value=0)  
         X_packed = pack_padded_sequence(X_padded, X_len, batch_first=True, enforce_sorted=False)
         
-        return X_packed, X_len, Y_padded, Y_len
+        #return X_packed, X_len, Y_padded, Y_len
+        return X_packed, Y_padded
         
 
 
