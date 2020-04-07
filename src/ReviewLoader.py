@@ -133,11 +133,68 @@ class ReviewDataset(IterableDataset):
         return self.parse_file()
 
 
+
+def one_hot_embedding(x, embed_size):
+    """
+    Converts a list of word-indices to their corresponding one-hot respresentation.
+
+    Params:
+        x: a torch.LongTensor shaped [seq_len]
+        embed_size: size of the one-hot vector. Usually equal to dict_size.
+    """
+    x_hot = one_hot(x, num_classes=embed_size).float()
+    return x_hot
+
+def nnEmbedding(x, embed_size):
+    """
+    Converts a list of word-indices to an embedding using PyTorch's nn.Embedding() module.
+
+    Params:
+        x: a torch.LongTensor shaped [seq_len]
+        embed_size: size of the real-valued vector
+    """
+
+
+class Embedder:
+    def __init__(self, method, dict_size, embedding_dim):
+        """
+        Params:
+            num_embeddings: How many words to encode?
+            embedding_dim: size of embedded input vector x_t
+        """
+        self.num_embeddings = dict_size  
+        self.embedding_dim = embedding_dim
+        self.method = method
+        
+        if method == "onehot":
+            if dict_size != embedding_dim:
+                raise Exception("If using one-hot, dict_size must equal embed_dim!")
+        
+        if method == "nnEmbedding":
+            self.embedding = nn.Embedding(dict_size, embedding_dim)
+            self.embedding.weight.requires_grad=False
+
+    def one_hot_embedding(self, x):
+        x_hot = one_hot(x, num_classes=self.embedding_dim)
+        return x_hot.float()
+
+    def embed(self, x):
+        if self.method == "onehot":
+            return self.one_hot_embedding(x)
+        elif self.method == "nnEmbedding":
+            return self.embedding(x)
+
+
 class Collator():
     
-    def __init__(self, encoding):
+    def __init__(self, encoding, embedder):
+        """
+            encoding: word2id dictionary
+            embedder: instance of class Embedder
+        """
         self.encoding = encoding
         self.dict_size = len(encoding)
+        self.embedder = embedder
 
     def __call__(self, batch):
         
@@ -147,19 +204,23 @@ class Collator():
         #Y_len = []
 
         for line in batch:
+            # Represent the line (review) as a list of integers
             encoded_line = [self.encoding[word.lower()] if word.lower() in self.encoding.keys()
             else self.encoding["<UNK>"]
             for word in line.split(' ')]
             encoded_line.insert(0, self.encoding["<SOR>"])
             encoded_line.append(self.encoding["<EOR>"])
             
-            x = one_hot(torch.LongTensor(encoded_line[:-1]), num_classes=self.dict_size).float()
+            # Embed the inputs of the sequence x = [x1, ... xT]
+            x = torch.LongTensor(encoded_line[:-1])
+            x = embedder.embed(x)
+
+            # The labels y = [y1, ..., yT] don't have to be embedded for CrossEntropyLoss
             y = torch.LongTensor(encoded_line[1:])
 
-            X.append(x)         
+            X.append(x)
             X_len.append(len(encoded_line[:-1]))
             Y.append(y)            
-            #Y_len.append(len(encoded_line[1:]))
         
         X_padded = pad_sequence(X, batch_first=True, padding_value=0)
         Y_padded = pad_sequence(Y, batch_first=True, padding_value=0)  
