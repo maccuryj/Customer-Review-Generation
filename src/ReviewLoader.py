@@ -213,7 +213,7 @@ class Collator():
             
             # Embed the inputs of the sequence x = [x1, ... xT]
             x = torch.LongTensor(encoded_line[:-1])
-            x = embedder.embed(x)
+            x = self.embedder.embed(x)
 
             # The labels y = [y1, ..., yT] don't have to be embedded for CrossEntropyLoss
             y = torch.LongTensor(encoded_line[1:])
