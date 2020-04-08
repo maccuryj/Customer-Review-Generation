@@ -179,6 +179,10 @@ class Embedder:
         return x_hot.float()
 
     def embed(self, x):
+        """
+        Parameters:
+            x: 
+        """
         if self.method == "onehot":
             return self.one_hot_embedding(x)
         elif self.method == "nnEmbedding":
@@ -210,10 +214,17 @@ class Collator():
             for word in line.split(' ')]
             encoded_line.insert(0, self.encoding["<SOR>"])
             encoded_line.append(self.encoding["<EOR>"])
-            
+
+            # Count the number of <UNK> tokens in the encoded_line (=review). If there are too many
+            # unkowns, don't include this review in training
+            unkowns = list(filter(lambda x: x == self.encoding["<UNK>"], encoded_line))
+            num_unkowns = len(unkowns)
+            if num_unkowns >= 3:
+                continue
+                
             # Embed the inputs of the sequence x = [x1, ... xT]
             x = torch.LongTensor(encoded_line[:-1])
-            x = self.embedder.embed(x)
+            x = self.embedder.embed(x)            
 
             # The labels y = [y1, ..., yT] don't have to be embedded for CrossEntropyLoss
             y = torch.LongTensor(encoded_line[1:])
