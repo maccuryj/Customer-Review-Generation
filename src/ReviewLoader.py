@@ -133,29 +133,13 @@ class ReviewDataset(IterableDataset):
         return self.parse_file()
 
 
-
-def one_hot_embedding(x, embed_size):
-    """
-    Converts a list of word-indices to their corresponding one-hot respresentation.
-
-    Params:
-        x: a torch.LongTensor shaped [seq_len]
-        embed_size: size of the one-hot vector. Usually equal to dict_size.
-    """
-    x_hot = one_hot(x, num_classes=embed_size).float()
-    return x_hot
-
-def nnEmbedding(x, embed_size):
-    """
-    Converts a list of word-indices to an embedding using PyTorch's nn.Embedding() module.
-
-    Params:
-        x: a torch.LongTensor shaped [seq_len]
-        embed_size: size of the real-valued vector
-    """
-
-
 class Embedder:
+    """
+    Class for transforming words into vectors in the specified way. 
+    Supports either a one-hot encoding, or an embedding of words 
+    using Pytorch's nn.Embedding
+    """
+
     def __init__(self, method, dict_size, embedding_dim):
         """
         Params:
@@ -231,7 +215,7 @@ class Collator():
 
             X.append(x)
             X_len.append(len(encoded_line[:-1]))
-            Y.append(y)            
+            Y.append(y)
         
         X_padded = pad_sequence(X, batch_first=True, padding_value=0)
         Y_padded = pad_sequence(Y, batch_first=True, padding_value=0)  
@@ -239,13 +223,3 @@ class Collator():
         
         #return X_packed, X_len, Y_padded, Y_len
         return X_packed, Y_padded
-        
-
-
-
-
-
-
-
-
-    
