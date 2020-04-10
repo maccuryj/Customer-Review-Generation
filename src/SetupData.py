@@ -94,7 +94,7 @@ class SetupData():
                     break   
                 d = json.loads(line)
                 try:
-                    review = self.filter_review(d["reviewText"])
+                    review = self._filter_review(d["reviewText"])
                 except KeyError:
                     review = -1
                 if review != -1:
