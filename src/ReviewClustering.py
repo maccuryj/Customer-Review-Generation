@@ -121,11 +121,3 @@ class ReviewKMeans():
             ssq.append(spherical_kmeans.inertia_)
 
         sns.lineplot(np.arange(min_k,max_k,step), ssq)
-
-if __name__ == "__main__":
-    data_files = ["reviews.csv", "reviews_2.csv"]
-    dataset = ReviewDataset(data_files)
-    loader = DataLoader(dataset, batch_size=3)
-
-    for inp in loader:
-        print(inp)
