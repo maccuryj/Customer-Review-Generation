@@ -118,12 +118,8 @@ class SetupData():
             self._reviews_json2csv(dataset)            
 
 
-    def _reviews2BERT(self, dataset, n_reviews, batch_size, num_workers):
-        model = SentenceTransformer('bert-base-nli-mean-tokens')
-        use_cuda = torch.cuda.is_available()
-        device = torch.device("cuda:0" if use_cuda else "cpu")
-        model.to(device)
-
+    def _reviews2BERT(self, dataset, n_reviews, batch_size, num_workers, model):
+        
         batch_size = batch_size
         num_workers = num_workers
 
@@ -146,12 +142,18 @@ class SetupData():
         return
 
     def create_embedding_files(self, batch_size, num_workers):
-        for train_set in self.datasets:                                    
-            self._reviews2BERT(train_set, self.n_train_reviews, batch_size, num_workers)
+        model = SentenceTransformer('bert-base-nli-mean-tokens')
+        use_cuda = torch.cuda.is_available()
+        device = torch.device("cuda:0" if use_cuda else "cpu")
+        model.to(device)
+
+        train_datasets = [filename + '_train' for filename in self.datasets]
+        for train_set in train_datasets:                                    
+            self._reviews2BERT(train_set, self.n_train_reviews, batch_size, num_workers, model)
 
         test_datasets = [filename + '_test' for filename in self.datasets]
         for test_set in test_datasets:
-            self._reviews2BERT(test_set, self.n_test_reviews, batch_size, num_workers)
+            self._reviews2BERT(test_set, self.n_test_reviews, batch_size, num_workers, model)
 
 
 
