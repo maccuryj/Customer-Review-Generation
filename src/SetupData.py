@@ -25,7 +25,7 @@ class SetupData():
         n_test_reviews (int):               Number of test reviews per product dataset
     """
 
-    def __init__(self, data_folder, datasets, create_dir=False):
+    def __init__(self, data_folder, datasets, n_train_reviews, n_test_reviews, create_dir=False):
         self.data_folder = data_folder
         self.datasets = datasets
         self.n_train_reviews = 0
@@ -111,9 +111,7 @@ class SetupData():
 
         return
 
-    def create_csv_files(self, n_train_reviews, n_test_reviews):
-        self.n_train_reviews = n_train_reviews
-        self.n_test_reviews = n_test_reviews
+    def create_csv_files(self):
         for dataset in self.datasets:
             self._reviews_json2csv(dataset)            
 
@@ -133,7 +131,8 @@ class SetupData():
                 print("Processed: " , n_reviews/i, "%")
 
             encoding = model.encode(rev)
-            print(len(encoding))
+            print(len(rev))
+            print(rev)
             for j, enc in enumerate(encoding):
                 embeddings[batch_size*i+j] = enc
 
