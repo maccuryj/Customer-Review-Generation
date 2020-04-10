@@ -125,34 +125,34 @@ class SetupData():
 
         return
 
-        def create_embedding_files(self, batch_size, num_workers):
-            for dataset in datasets:                                    
-                self.reviews2BERT(dataset, batch_size, num_workers)
+    def create_embedding_files(self, batch_size, num_workers):
+        for dataset in datasets:                                    
+            self.reviews2BERT(dataset, batch_size, num_workers)
 
 
-        def test_indices(self, dataset, i=10, atol=1e-05):
-            """
-            This function tests whether the indices in the embedding files match those in the
-            .csv files. This is important, as those indices are later used for matching reviews
-            with their cluster.
-            """
-            
-            reviews = []
-            with open(os.path.join(data_folder, dataset + '.csv')) as f:
-                reader = csv.reader(f)
-                for j, row in enumerate(reader):
-                    if j < i:
-                        reviews.append(row[0])
-            
-            embeddings = np.load(os.path.join(data_folder, dataset + '_Embedding.npy'))
-            emb = embeddings[:i]
+    def test_indices(self, dataset, i=10, atol=1e-05):
+        """
+        This function tests whether the indices in the embedding files match those in the
+        .csv files. This is important, as those indices are later used for matching reviews
+        with their cluster.
+        """
+        
+        reviews = []
+        with open(os.path.join(data_folder, dataset + '.csv')) as f:
+            reader = csv.reader(f)
+            for j, row in enumerate(reader):
+                if j < i:
+                    reviews.append(row[0])
+        
+        embeddings = np.load(os.path.join(data_folder, dataset + '_Embedding.npy'))
+        emb = embeddings[:i]
 
-            model = SentenceTransformer('bert-base-nli-mean-tokens')
-            encoding = model.encode(reviews)            
+        model = SentenceTransformer('bert-base-nli-mean-tokens')
+        encoding = model.encode(reviews)            
 
-            # Checks numpy array equality. Due to small variations when saving files and converting,
-            # we check with a small fault tolerance of 'atol'.
-            if np.allclose(emb.astype(np.float32), np.array(encoding), atol=atol):
-                return True
-            else:
-                return False
+        # Checks numpy array equality. Due to small variations when saving files and converting,
+        # we check with a small fault tolerance of 'atol'.
+        if np.allclose(emb.astype(np.float32), np.array(encoding), atol=atol):
+            return True
+        else:
+            return False
