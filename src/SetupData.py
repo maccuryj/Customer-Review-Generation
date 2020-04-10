@@ -11,7 +11,7 @@ from sentence_transformers import SentenceTransformer
 import spacy
 nlp = spacy.load('en_core_web_sm')
 
-from src.ReviewLoader import ReviewDataset
+from ReviewLoader import ReviewDataset
 
 class SetupData():
     """
@@ -28,6 +28,8 @@ class SetupData():
     def __init__(self, data_folder, datasets, create_dir=False):
         self.data_folder = data_folder
         self.datasets = datasets
+        self.n_train_reviews = 0
+        self.n_test_reviews = 0
 
         if create_dir is True and not os.path.exists(data_folder):
             os.mkdir(data_folder)
@@ -135,6 +137,7 @@ class SetupData():
                 print("Processed: " , n_reviews/i, "%")
 
             encoding = model.encode(rev)
+            print(encoding.shape)
             for j, enc in enumerate(encoding):
                 embeddings[batch_size*i+j] = enc
 
