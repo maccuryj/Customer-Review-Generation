@@ -94,7 +94,7 @@ class SetupData():
     def create_csv_files(self, n_reviews):
         self.n_reviews = n_reviews
         for dataset in self.datasets:
-            reviews_json2csv(dataset, n_reviews)
+            self.reviews_json2csv(dataset, n_reviews)
 
 
     def reviews2BERT(self, dataset, batch_size, num_workers):
@@ -127,7 +127,7 @@ class SetupData():
 
         def create_embedding_files(self, batch_size, num_workers):
             for dataset in datasets:                                    
-                reviews2BERT(dataset, batch_size, num_workers)
+                self.reviews2BERT(dataset, batch_size, num_workers)
 
 
         def test_indices(self, dataset, i=10, atol=1e-05):
