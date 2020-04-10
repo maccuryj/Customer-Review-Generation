@@ -28,19 +28,21 @@ class ProductReviews():
         self.id2word = {}
         self.encoding_filename = ""
 
-    def create_vocabulary(self, file, max_features=10000, tfidf=False):
+    def create_vocabulary(self, files, max_features=10000, tfidf=False):
         """
         Make use of Term Frequency and (if set) Inverse Document Frequency to create a vocabulary
         for use in the RNN. The encoding is then adjusted and a decoding
         dictionary is created.
         """
+        
         if tfidf:
             vectorizer = TfidfVectorizer(max_features=max_features,  token_pattern=r"(?u)\b\w+\b")
         else:
-            vectorizer = TfidfVectorizer(max_features=max_features, use_idf=False,  token_pattern=r"(?u)\b\w+\b")
-        with open(os.path.join(self.review_dir, file), 'r') as f:
+            vectorizer = TfidfVectorizer(input='filename', max_features=max_features, use_idf=False,  token_pattern=r"(?u)\b\w+\b")
+
+            f = [os.path.join(self.review_dir, file) for file in files]
             words = vectorizer.fit_transform(f)
-        self.word2id = vectorizer.vocabulary_
+            self.word2id = vectorizer.vocabulary_
         
         self.adjust_encoding()
         self.create_decoding()        
@@ -73,13 +75,15 @@ class ProductReviews():
         for word in self.word2id:
             self.id2word[self.word2id[word]] = word
 
-    def get_reviewloader(self, batch_size):
+    def get_reviewloader(self, batch_size, files):
         """
         Creates PyTorch Dataloader for reviews
 
         Args:
             batch_size (int):               Batch size for DataLoader
         """
+        dataset = ReviewDataset(files)
+
         collator = Collator(self.word2id)
         loader = DataLoader(dataset, batch_size=batch_size, collate_fn=collator)
 
@@ -95,7 +99,7 @@ class ProductReviews():
         if '.pickle' not in filename:
                 filename = filename + '.pickle'
 
-        pickle.dump(word2id, open(os.path.join(review_dir, filename)))
+        pickle.dump(self.word2id, open(os.path.join(review_dir, filename)))
         self.encoding_filename = filename
 
 
@@ -111,26 +115,26 @@ class ProductReviews():
         word2id = pickle.load(open(os.path.join(review_dir, filename)))
         self.create_decoding()
 
+        self.word2id = word2id
         return word2id
 
 
 class ReviewDataset(IterableDataset):
 
-    def __init__(self, file, encoding):
-        self.file = file
-        self.encoding = encoding
+    def __init__(self, files):
+        self.files = files
 
-    def parse_file(self):
-        with open(self.file, 'r') as review_file:
+    def parse_file(self, file):
+        with open(file, 'r') as review_file:
             reader = csv.reader(review_file)
             for line in reader:             
                 yield from line
 
-    def get_stream():
-
+    def get_stream(self):        
+        return chain.from_iterable(map(self.parse_file, self.files))
 
     def __iter__(self):
-        return self.parse_file()
+        return self.get_stream()
 
 
 class Collator():
