@@ -31,7 +31,7 @@ class SetupData():
         if create_dir is True and not os.path.exists(data_folder):
             os.mkdir(data_folder)
 
-    def _adjust_string(s):
+    def _adjust_string(self, s):
         """
         Lowercase, trim, and remove non-letter characters
         https://pytorch.org/tutorials/intermediate/seq2seq_translation_tutorial.html
