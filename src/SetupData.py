@@ -94,7 +94,7 @@ class SetupData():
     def create_csv_files(self, n_reviews):
         self.n_reviews = n_reviews
         for dataset in self.datasets:
-            self.reviews_json2csv(dataset, n_reviews)
+            self.reviews_json2csv(dataset)            
 
 
     def reviews2BERT(self, dataset, batch_size, num_workers):
