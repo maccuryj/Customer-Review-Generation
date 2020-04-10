@@ -21,7 +21,8 @@ class SetupData():
     Attributes:
         data_folder (str):                  Path of the folder that holds review data
         datasets (str []):                  Array of names of datasets retrieved from the Amazon Review Corpus
-        n_reviews (int):                    Number of reviews per dataset
+        n_train_reviews (int):              Number of training reviews per product dataset
+        n_test_reviews (int):               Number of test reviews per product dataset
     """
 
     def __init__(self, data_folder, datasets, create_dir=False):
@@ -41,7 +42,7 @@ class SetupData():
         s = re.sub(r"[^a-zA-Z.!?]+", r" ", s)
         return s
 
-    def filter_review(self, review):
+    def _filter_review(self, review):
         tokenized_review = nlp(review)
         noun = 0
         verb = 0
@@ -67,13 +68,29 @@ class SetupData():
         else:
             return -1
 
-    def reviews_json2csv(self, dataset):
-        reviews = []
+    def _save_reviews(self, reviews, filename, filetype='csv'):
+        if filetype not in ['csv', 'npy']:
+            raise ValueError('filetype argument not valid')
+        else:
+            print("Saving: ", filename)
+            if filetype is 'csv':                
+                with open(os.path.join(self.data_folder, filename), 'w') as csvfile:
+                    writer = csv.writer(csvfile)
+                    for i, rev in enumerate(reviews):
+                        writer.writerow([rev])
+            if filetype is 'npy':
+                filename = os.path.join(self.data_folder, filename)
+                np.save(filename, embeddings)
+
+
+    def _reviews_json2csv(self, dataset):
+        train_reviews = []
+        test_reviews = []
         i = 0
         print("Processing: ", dataset)
         with gzip.GzipFile(dataset + '.json.gz', 'r') as f:
             for line in f.readlines():
-                if i == self.n_reviews:
+                if i == self.n_train_reviews + self.n_test_reviews:
                     break   
                 d = json.loads(line)
                 try:
@@ -81,23 +98,25 @@ class SetupData():
                 except KeyError:
                     review = -1
                 if review != -1:
-                    reviews.append(review)
-                    i = i+1    
-        print("Saving " + dataset + ".csv")
-        with open(os.path.join(self.data_folder, dataset + '.csv'), 'w') as csvfile:
-            writer = csv.writer(csvfile)
-            for i, rev in enumerate(reviews):
-                writer.writerow([rev])
+                    if i <= self.n_train_reviews:
+                        train_reviews.append(review)
+                    else:
+                        test_reviews.append(review)
+                    i = i + 1
+
+        self.save_reviews(train_reviews, dataset + "_train.csv", 'csv')
+        self.save_reviews(test_reviews, dataset + "_test.csv", 'csv')
 
         return
 
-    def create_csv_files(self, n_reviews):
-        self.n_reviews = n_reviews
+    def create_csv_files(self, n_train_reviews, n_test_reviews):
+        self.n_train_reviews = n_train_reviews
+        self.n_test_reviews = n_test_reviews
         for dataset in self.datasets:
-            self.reviews_json2csv(dataset)            
+            self._reviews_json2csv(dataset)            
 
 
-    def reviews2BERT(self, dataset, batch_size, num_workers):
+    def _reviews2BERT(self, dataset, batch_size, num_workers):
         model = SentenceTransformer('bert-base-nli-mean-tokens')
         use_cuda = torch.cuda.is_available()
         device = torch.device("cuda:0" if use_cuda else "cpu")
@@ -119,15 +138,18 @@ class SetupData():
             for j, enc in enumerate(encoding):
                 embeddings[batch_size*i+j] = enc
 
-        print("Saving " + dataset + "_Embedding.npy")
-        filename = os.path.join(self.data_folder, dataset + "_Embedding")
-        np.save(filename, embeddings)
+        self._save_reviews(embeddings, dataset, 'npy')
 
         return
 
     def create_embedding_files(self, batch_size, num_workers):
-        for dataset in datasets:                                    
-            self.reviews2BERT(dataset, batch_size, num_workers)
+        for train_set in self.datasets:                                    
+            self._reviews2BERT(train_set, batch_size, num_workers)
+
+        test_datasets = [filename + '_test' for filename in self.datasets]
+        for test_set in test_datasets:
+            self._reviews2BERT(test_set, batch_size, num_workers)
+
 
 
     def test_indices(self, dataset, i=10, atol=1e-05):
