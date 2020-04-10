@@ -116,7 +116,7 @@ class SetupData():
             self._reviews_json2csv(dataset)            
 
 
-    def _reviews2BERT(self, dataset, batch_size, num_workers):
+    def _reviews2BERT(self, dataset, n_reviews, batch_size, num_workers):
         model = SentenceTransformer('bert-base-nli-mean-tokens')
         use_cuda = torch.cuda.is_available()
         device = torch.device("cuda:0" if use_cuda else "cpu")
@@ -126,13 +126,13 @@ class SetupData():
         num_workers = num_workers
 
         print("Processing: ", dataset)
-        embeddings = np.empty((self.n_reviews, 768,))
+        embeddings = np.empty((n_reviews, 768,))
         review_loader = DataLoader(ReviewDataset([os.path.join(self.data_folder, dataset + '.csv')]), batch_size=batch_size, num_workers=num_workers)
 
         for i, rev in review_loader:
             
             if i % 5000 == 0 and i != 0:
-                print("Processed: " , self.n_reviews/i, "%")
+                print("Processed: " , n_reviews/i, "%")
 
             encoding = model.encode(rev)
             for j, enc in enumerate(encoding):
@@ -144,11 +144,11 @@ class SetupData():
 
     def create_embedding_files(self, batch_size, num_workers):
         for train_set in self.datasets:                                    
-            self._reviews2BERT(train_set, batch_size, num_workers)
+            self._reviews2BERT(train_set, self.n_train_reviews, batch_size, num_workers)
 
         test_datasets = [filename + '_test' for filename in self.datasets]
         for test_set in test_datasets:
-            self._reviews2BERT(test_set, batch_size, num_workers)
+            self._reviews2BERT(test_set, self.n_test_reviews, batch_size, num_workers)
 
 
 
