@@ -28,8 +28,8 @@ class SetupData():
     def __init__(self, data_folder, datasets, n_train_reviews, n_test_reviews, create_dir=False):
         self.data_folder = data_folder
         self.datasets = datasets
-        self.n_train_reviews = 0
-        self.n_test_reviews = 0
+        self.n_train_reviews = n_train_reviews
+        self.n_test_reviews = n_test_reviews
 
         if create_dir is True and not os.path.exists(data_folder):
             os.mkdir(data_folder)
