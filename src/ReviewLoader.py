@@ -137,42 +137,93 @@ class ReviewDataset(IterableDataset):
         return self.get_stream()
 
 
+class Embedder:
+    """
+    Class for transforming words into vectors in the specified way. 
+    Supports either a one-hot encoding, or an embedding of words 
+    using Pytorch's nn.Embedding
+    """
+
+    def __init__(self, method, dict_size, embedding_dim):
+        """
+        Params:
+            num_embeddings: How many words to encode?
+            embedding_dim: size of embedded input vector x_t
+        """
+        self.num_embeddings = dict_size  
+        self.embedding_dim = embedding_dim
+        self.method = method
+        
+        if method == "onehot":
+            if dict_size != embedding_dim:
+                raise Exception("If using one-hot, dict_size must equal embed_dim!")
+        
+        if method == "nnEmbedding":
+            self.embedding = nn.Embedding(dict_size, embedding_dim)
+            self.embedding.weight.requires_grad=False
+
+    def one_hot_embedding(self, x):
+        x_hot = one_hot(x, num_classes=self.embedding_dim)
+        return x_hot.float()
+
+    def embed(self, x):
+        """
+        Parameters:
+            x: 
+        """
+        if self.method == "onehot":
+            return self.one_hot_embedding(x)
+        elif self.method == "nnEmbedding":
+            return self.embedding(x)
+
+
 class Collator():
     
-    def __init__(self, encoding):
+    def __init__(self, encoding, embedder):
+        """
+            encoding: word2id dictionary
+            embedder: instance of class Embedder
+        """
         self.encoding = encoding
+        self.dict_size = len(encoding)
+        self.embedder = embedder
 
     def __call__(self, batch):
         
         X = []
         X_len = []
         Y = []
-        Y_len = []
+        #Y_len = []
 
         for line in batch:
+            # Represent the line (review) as a list of integers
             encoded_line = [self.encoding[word.lower()] if word.lower() in self.encoding.keys()
             else self.encoding["<UNK>"]
             for word in line.split(' ')]
             encoded_line.insert(0, self.encoding["<SOR>"])
             encoded_line.append(self.encoding["<EOR>"])
-            
-            X.append(one_hot(torch.LongTensor(encoded_line[:-1])).float())         
+
+            # Count the number of <UNK> tokens in the encoded_line (=review). If there are too many
+            # unkowns, don't include this review in training
+            unkowns = list(filter(lambda x: x == self.encoding["<UNK>"], encoded_line))
+            num_unkowns = len(unkowns)
+            if num_unkowns >= 3:
+                continue
+                
+            # Embed the inputs of the sequence x = [x1, ... xT]
+            x = torch.LongTensor(encoded_line[:-1])
+            x = self.embedder.embed(x)            
+
+            # The labels y = [y1, ..., yT] don't have to be embedded for CrossEntropyLoss
+            y = torch.LongTensor(encoded_line[1:])
+
+            X.append(x)
             X_len.append(len(encoded_line[:-1]))
-            Y.append(torch.LongTensor(encoded_line[1:]))            
-            Y_len.append(len(encoded_line[1:]))
+            Y.append(y)
         
         X_padded = pad_sequence(X, batch_first=True, padding_value=0)
         Y_padded = pad_sequence(Y, batch_first=True, padding_value=0)  
         X_packed = pack_padded_sequence(X_padded, X_len, batch_first=True, enforce_sorted=False)
         
-        return X_packed, X_len, Y_padded, Y_len
-        
-
-
-
-
-
-
-
-
-    
+        #return X_packed, X_len, Y_padded, Y_len
+        return X_packed, Y_padded
