@@ -63,7 +63,7 @@ class SetupData():
 
         if noun + verb + adj > 1:
             s = ' '.join(tok.text for tok in tokenized_review)
-            return _adjust_string(s)
+            return self._adjust_string(s)
         else:
             return -1
 
@@ -77,7 +77,7 @@ class SetupData():
                     break   
                 d = json.loads(line)
                 try:
-                    review = filter_review(d["reviewText"])
+                    review = self.filter_review(d["reviewText"])
                 except KeyError:
                     review = -1
                 if review != -1:
