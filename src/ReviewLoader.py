@@ -193,7 +193,6 @@ class Collator():
         X = []
         X_len = []
         Y = []
-        #Y_len = []
 
         for line in batch:
             # Represent the line (review) as a list of integers
@@ -225,5 +224,4 @@ class Collator():
         Y_padded = pad_sequence(Y, batch_first=True, padding_value=0)  
         X_packed = pack_padded_sequence(X_padded, X_len, batch_first=True, enforce_sorted=False)
         
-        #return X_packed, X_len, Y_padded, Y_len
         return X_packed, Y_padded
