@@ -104,8 +104,8 @@ class SetupData():
                         test_reviews.append(review)
                     i = i + 1
 
-        self.save_reviews(train_reviews, dataset + "_train.csv", 'csv')
-        self.save_reviews(test_reviews, dataset + "_test.csv", 'csv')
+        self._save_reviews(train_reviews, dataset + "_train.csv", 'csv')
+        self._save_reviews(test_reviews, dataset + "_test.csv", 'csv')
 
         return
 
