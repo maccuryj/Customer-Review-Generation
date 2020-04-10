@@ -129,9 +129,9 @@ class SetupData():
         embeddings = np.empty((n_reviews, 768,))
         review_loader = DataLoader(ReviewDataset([os.path.join(self.data_folder, dataset + '.csv')]), batch_size=batch_size, num_workers=num_workers)
 
-        for i, rev in review_loader:
+        for i, rev in enumerate(review_loader):
             
-            if i % 5000 == 0 and i != 0:
+            if i % round(n_reviews/10) == 0 and i != 0:
                 print("Processed: " , n_reviews/i, "%")
 
             encoding = model.encode(rev)
