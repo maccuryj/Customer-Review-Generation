@@ -151,13 +151,13 @@ class ReviewKMeans():
 
     def test_indices(self, file, i):
         embeddings = np.load(file)
-        emb = embeddings[1:i+1]
+        emb = embeddings[1, i+1]
         del(embeddings)
         
         preds = self.model.predict(emb)
         print(pred)
         labels = []
-        for i in range(1:i+1):
+        for i in range(1, i+1):
             labels.append(self.cluster_dict[file + ' - ' + i])
         print(labels)
         if pred == labels:
