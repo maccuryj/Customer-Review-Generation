@@ -114,7 +114,7 @@ class ReviewKMeans():
 
 
 
-    def elbow_plot(min_k=20, max_k=300, step=20, notification_step=100, batch_size=2048):
+    def elbow_plot(self, min_k=20, max_k=300, step=20, notification_step=100, batch_size=2048):
         ssq = []
         n_steps = (max_k-min_k)/step
         loader = self._get_embeddingloader(batch_size) 
