@@ -103,7 +103,7 @@ class ReviewKMeans():
         loader = self._get_embeddingloader(batch_size)        
         clustering = MiniBatchKMeans(n_clusters=k, batch_size=batch_size)
 
-        for batch in loader:
+        for f, batch in loader:
             normalize(batch)
             clustering.partial_fit(batch)
 
@@ -123,10 +123,7 @@ class ReviewKMeans():
             if k % notification_step == 0:
                 print("K: ", k)            
             clustering = MiniBatchKMeans(n_clusters=k, batch_size=batch_size)
-            for batch in loader:
-                print(batch)
-                print(type(batch))
-                print(batch.shape)
+            for f, batch in loader:
                 normalize(batch)
                 clustering.partial_fit(batch)
 
