@@ -52,11 +52,12 @@ class ReviewClustering():
 
 class ReviewEmbeddingDataset(IterableDataset):
 
-    def __init__(self, files):
+    def __init__(self, data_folder, files):
         self.files = files
+        self.data_folder = data_folder
 
     def parse_file(self, file):
-        embeddings = np.load(os.path.join(data_folder, file + '_Embedding.npy'))
+        embeddings = np.load(os.path.join(self.data_folder, file))
         for i, emb in enumerate(embeddings):
             yield file, emb
 
