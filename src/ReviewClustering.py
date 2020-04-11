@@ -158,7 +158,7 @@ class ReviewKMeans():
         print(preds)
         labels = []
         for i in range(1, i+1):
-            labels.append(self.cluster_dict[file + ' - ' + i])
+            labels.append(self.cluster_dict[file + ' - ' + str(i)])
         print(labels)
         if pred == labels:
             return True
