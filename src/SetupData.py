@@ -122,7 +122,6 @@ class SetupData():
     def _reviews2BERT(self, dataset, n_reviews, batch_size, model):
         
         batch_size = batch_size
-        num_workers = num_workers
 
         print("Processing: ", dataset)
         embeddings = np.empty((n_reviews, 768,))
@@ -134,8 +133,7 @@ class SetupData():
                 print("Processed: " , n_reviews/i, "%")
 
             encoding = model.encode(rev)
-            print(len(rev))
-            print(rev)
+
             for j, enc in enumerate(encoding):
                 embeddings[batch_size*i+j] = enc
 
@@ -185,20 +183,3 @@ class SetupData():
             return True
         else:
             return False
-
-class RevDataset(IterableDataset):
-
-    def __init__(self, files):
-        self.files = files
-
-    def parse_file(self, file):
-        with open(file, 'r') as review_file:
-            reader = csv.reader(review_file)
-            for line in reader:             
-                yield from line
-
-    def get_stream(self):        
-        return chain.from_iterable(map(self.parse_file, self.files))
-
-    def __iter__(self):
-        return self.get_stream()
