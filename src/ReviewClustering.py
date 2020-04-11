@@ -151,7 +151,7 @@ class ReviewKMeans():
 
     def test_indices(self, file, i):
         embeddings = np.load(file)
-        emb = embeddings[1, i+1]
+        emb = embeddings[1:i+1]
         del(embeddings)
         print(emb)
         preds = self.model.predict(emb)
