@@ -153,9 +153,9 @@ class ReviewKMeans():
         embeddings = np.load(file)
         emb = embeddings[1, i+1]
         del(embeddings)
-        
+        print(emb)
         preds = self.model.predict(emb)
-        print(pred)
+        print(preds)
         labels = []
         for i in range(1, i+1):
             labels.append(self.cluster_dict[file + ' - ' + i])
