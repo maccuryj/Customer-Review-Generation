@@ -87,7 +87,6 @@ class ReviewKMeans():
 
         loader = self._get_embeddingloader(batch_size)        
         clustering = MiniBatchKMeans(n_clusters=k, batch_size=batch_size)
-        normalizer = Normalizer(copy=False)
 
         for batch in loader:
             print(batch)
