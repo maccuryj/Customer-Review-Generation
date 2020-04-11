@@ -2,6 +2,7 @@ import numpy as np
 import os
 import csv
 from joblib import dump, load
+from itertools import chain
 from sklearn.cluster import MiniBatchKMeans
 from sklearn.preprocessing import normalize
 from torch.utils.data import DataLoader, IterableDataset
