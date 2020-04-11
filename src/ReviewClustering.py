@@ -79,11 +79,23 @@ class ReviewKMeans():
 
         return self.loader
 
-    def _compute_clusters(self, loader, clustering):
+    def _compute_clusters(self, loader, clustering, batch_size):
         self.cluster_dict = {}
 
-        for i, batch in enumerate(loader):
-            print(batch)
+        i = 0
+        curr_file = ""
+        for file, batch in loader:
+            preds = clustering.predict()
+            for j in range(batch_size):
+                #Reset index when changing file
+                if file[j] != curr_file:
+                    curr_file = file[j]
+                    i = 0
+
+                
+                    self.cluster_dict[file[j] + ' - ' + str(i)] = preds[j]
+                    i = i + 1
+        print(cluster_dict)
 
 
     def MB_Spherical_KMeans(self, k, batch_size=2048, save=True):
@@ -91,10 +103,7 @@ class ReviewKMeans():
         loader = self._get_embeddingloader(batch_size)        
         clustering = MiniBatchKMeans(n_clusters=k, batch_size=batch_size)
 
-        for f, batch in loader:
-            print(batch)
-            #Preserve file processing order, so indices can be matched
-
+        for batch in loader:
             normalize(batch)
             clustering.partial_fit(batch)
 
@@ -105,26 +114,20 @@ class ReviewKMeans():
 
 
 
-    def elbow_plot(min_k=20, max_k=300, step=20, notice_step=100, batch_size=2048):
+    def elbow_plot(min_k=20, max_k=300, step=20, notification_step=100, batch_size=2048):
         ssq = []
+        n_steps = (max_k-min_k)/step
+        loader = self._get_embeddingloader(batch_size) 
 
         for k in range(min_k, max_k, step):
-            if k % 100 == 0:
-                print("K: ", k)
+            if k % notification_step == 0:
+                print("K: ", k)            
             clustering = MiniBatchKMeans(n_clusters=k, batch_size=batch_size)
-            normalizer = Normalizer(copy=False)
-            spherical_kmeans = make_pipeline(normalizer, clustering)
+            for batch in loader:
+                normalize(batch)
+                clustering.partial_fit(batch)
 
-            spherical_kmeans.fit(samples)
 
-            ssq.append(spherical_kmeans.inertia_)
+            ssq.append(clustering.inertia_)
 
         sns.lineplot(np.arange(min_k,max_k,step), ssq)
-
-if __name__ == "__main__":
-    data_files = ["reviews.csv", "reviews_2.csv"]
-    dataset = ReviewDataset(data_files)
-    loader = DataLoader(dataset, batch_size=3)
-
-    for inp in loader:
-        print(inp)
