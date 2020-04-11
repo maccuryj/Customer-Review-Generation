@@ -124,6 +124,9 @@ class ReviewKMeans():
                 print("K: ", k)            
             clustering = MiniBatchKMeans(n_clusters=k, batch_size=batch_size)
             for batch in loader:
+                print(batch)
+                print(type(batch))
+                print(batch.shape)
                 normalize(batch)
                 clustering.partial_fit(batch)
 
