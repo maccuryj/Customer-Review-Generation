@@ -79,22 +79,19 @@ class ReviewKMeans():
 
         return self.loader
 
-    def _compute_clusters(self, loader, clustering, batch_size):
+    def _compute_clusters(self, loader, clustering):
         self.cluster_dict = {}
 
         i = 0
         curr_file = ""
-        for file, batch in loader:
+        for files, batch in loader:
             preds = clustering.predict(batch)
-            print(file)
-            for j in range(batch_size):
-                print(j)                
-                print(file[j])
+            for j in range(len(files)):
                 #Reset index when changing file
-                if file[j] != curr_file:
-                    curr_file = file[j]
+                if files[j] != curr_file:
+                    curr_file = files[j]
                     i = 0                
-                self.cluster_dict[file[j] + ' - ' + str(i)] = preds[j]
+                self.cluster_dict[files[j] + ' - ' + str(i)] = preds[j]
                 i = i + 1
 
         print(cluster_dict)
@@ -112,7 +109,7 @@ class ReviewKMeans():
         if save:
             dump(clustering, "KMeansModel.joblib")
 
-        self._compute_clusters(loader, clustering, batch_size)
+        self._compute_clusters(loader, clustering)
 
 
 
