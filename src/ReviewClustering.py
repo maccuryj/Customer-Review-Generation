@@ -4,7 +4,7 @@ import csv
 from joblib import dump, load
 from sklearn.cluster import MiniBatchKMeans
 from sklearn.preprocessing import normalize
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, IterableDataset
 from matplotlib import pyplot as plt
 import seaborn as sns
 sns.set(rc={'figure.figsize':(11.7,8.27)})
