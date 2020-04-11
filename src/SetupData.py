@@ -13,6 +13,9 @@ nlp = spacy.load('en_core_web_sm')
 
 from ReviewLoader import ReviewDataset
 
+from torch.utils.data import IterableDataset
+from itertools import chain
+
 class SetupData():
     """
     Class for the initial setup of review data. Assumes that the .json.gz review files were downloaded from 
@@ -116,14 +119,14 @@ class SetupData():
             self._reviews_json2csv(dataset)            
 
 
-    def _reviews2BERT(self, dataset, n_reviews, batch_size, num_workers, model):
+    def _reviews2BERT(self, dataset, n_reviews, batch_size, model):
         
         batch_size = batch_size
         num_workers = num_workers
 
         print("Processing: ", dataset)
         embeddings = np.empty((n_reviews, 768,))
-        review_loader = DataLoader(ReviewDataset([os.path.join(self.data_folder, dataset + '.csv')]), batch_size=batch_size, num_workers=num_workers)
+        review_loader = DataLoader(ReviewDataset([os.path.join(self.data_folder, dataset + '.csv')]), batch_size=batch_size)
 
         for i, rev in enumerate(review_loader):
             
@@ -140,7 +143,7 @@ class SetupData():
 
         return
 
-    def create_embedding_files(self, batch_size, num_workers):
+    def create_embedding_files(self, batch_size):
         model = SentenceTransformer('bert-base-nli-mean-tokens')
         use_cuda = torch.cuda.is_available()
         device = torch.device("cuda:0" if use_cuda else "cpu")
@@ -148,11 +151,11 @@ class SetupData():
 
         train_datasets = [filename + '_train' for filename in self.datasets]
         for train_set in train_datasets:                                    
-            self._reviews2BERT(train_set, self.n_train_reviews, batch_size, num_workers, model)
+            self._reviews2BERT(train_set, self.n_train_reviews, batch_size, model)
 
         test_datasets = [filename + '_test' for filename in self.datasets]
         for test_set in test_datasets:
-            self._reviews2BERT(test_set, self.n_test_reviews, batch_size, num_workers, model)
+            self._reviews2BERT(test_set, self.n_test_reviews, batch_size, model)
 
 
 
@@ -182,3 +185,20 @@ class SetupData():
             return True
         else:
             return False
+
+class RevDataset(IterableDataset):
+
+    def __init__(self, files):
+        self.files = files
+
+    def parse_file(self, file):
+        with open(file, 'r') as review_file:
+            reader = csv.reader(review_file)
+            for line in reader:             
+                yield from line
+
+    def get_stream(self):        
+        return chain.from_iterable(map(self.parse_file, self.files))
+
+    def __iter__(self):
+        return self.get_stream()
