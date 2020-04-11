@@ -103,7 +103,7 @@ class SetupData():
                 except KeyError:
                     review = -1
                 if review != -1:
-                    if i <= self.n_train_reviews:
+                    if i < self.n_train_reviews:
                         train_reviews.append(review)
                     else:
                         test_reviews.append(review)
