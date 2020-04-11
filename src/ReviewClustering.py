@@ -87,6 +87,7 @@ class ReviewKMeans():
         for file, batch in loader:
             preds = clustering.predict(batch)
             for j in range(batch_size):
+                print(j)
                 #Reset index when changing file
                 if file[j] != curr_file:
                     curr_file = file[j]
