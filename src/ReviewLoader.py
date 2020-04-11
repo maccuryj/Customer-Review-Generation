@@ -1,9 +1,9 @@
 import os
 import csv
 import numpy
-import pickle
 import unicodedata
 from itertools import chain
+from joblib import dump, load
 import torch
 import torch.nn as nn
 from torch.nn.utils.rnn import pad_sequence, pack_padded_sequence
@@ -20,6 +20,9 @@ class ProductReviews():
     Attributes:
         root_dir (str):                 absolute path of review directory
         word2id (dict):                 word to index dictionary
+        id2word (dict):                 index to word dictionary
+        encoding_filename (str):        name of file containing word to index dictionary
+
     """    
 
     def __init__(self, review_dir):        
@@ -89,36 +92,55 @@ class ProductReviews():
 
         return loader
 
-    def save_vocab(filename):
+    def save_vocab(self, filename):
+        # TODO: Change to joblib
         """
         Save a vocabulary on disk.
 
         Args:
             filename (str):                 Name of file to save the words
         """
-        if '.pickle' not in filename:
-                filename = filename + '.pickle'
+        if '.joblib' not in filename:
+            filename = filename + '.joblib'
 
-        pickle.dump(self.word2id, open(os.path.join(review_dir, filename)))
+        dump(self.word2id, open(os.path.join(review_dir, filename)))
         self.encoding_filename = filename
 
 
-    def load_vocab(filename):
+    def load_vocab(self, filename):
+        # TODO: Change to joblib
         """
         Load a vocabulary from disk.
 
         Args:
             filename (str):                 Name of file containing the words
         """        
-        if '.pickle' not in filename:
-                filename = filename + '.pickle'
-        word2id = pickle.load(open(os.path.join(review_dir, filename)))
+        if '.joblib' not in filename:
+            filename = filename + '.joblib'
+
+        self.word2id = load(open(os.path.join(review_dir, filename)))
         self.create_decoding()
 
-        self.word2id = word2id
-        return word2id
+        return self.word2id
+
+    def load_cluster_labels(self, filename='ClusterDict.joblib'):
+        """
+        Load a dictionary of cluster labels from disk.
+
+        Args:
+            filename (str):                 Name of file containing the dictionary
+        """        
+        if '.joblib' not in filename:
+            filename = filename + '.joblib'
+
+        self.cluster_dict = load(filename)
+
+        return self.cluster_dict
 
 
+
+# Check if need to accomodate for num_workers > 0,
+# as currently only supports single process.
 class ReviewDataset(IterableDataset):
 
     def __init__(self, files):
