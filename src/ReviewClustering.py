@@ -9,7 +9,7 @@ from matplotlib import pyplot as plt
 import seaborn as sns
 sns.set(rc={'figure.figsize':(11.7,8.27)})
 
-from src.ReviewLoader import ReviewDataset
+from ReviewLoader import ReviewDataset
 
 class ReviewClustering():
 
@@ -121,3 +121,11 @@ class ReviewKMeans():
             ssq.append(spherical_kmeans.inertia_)
 
         sns.lineplot(np.arange(min_k,max_k,step), ssq)
+
+if __name__ == "__main__":
+    data_files = ["reviews.csv", "reviews_2.csv"]
+    dataset = ReviewDataset(data_files)
+    loader = DataLoader(dataset, batch_size=3)
+
+    for inp in loader:
+        print(inp)
