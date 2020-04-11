@@ -85,7 +85,7 @@ class SetupData():
                         writer.writerow([rev])
             if filetype is 'npy':
                 filename = os.path.join(self.data_folder, filename)
-                np.save(filename, embeddings)
+                np.save(filename, reviews)
 
 
     def _reviews_json2csv(self, dataset):
