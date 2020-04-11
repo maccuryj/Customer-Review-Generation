@@ -110,7 +110,7 @@ class ReviewKMeans():
         if save:
             dump(clustering, "KMeansModel.joblib")
 
-        self._compute_clusters(loader, clustering)
+        self._compute_clusters(loader, clustering, batch_size)
 
 
 
