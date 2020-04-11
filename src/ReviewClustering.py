@@ -79,10 +79,18 @@ class ReviewKMeans():
 
         return self.loader
 
-    def _compute_clusters(self, loader, clustering):
+    def load_model(self, filename='KMeansModel.joblib'):
+        self.model = load(filename)
+        return self.model
+
+    def load_labels(self, filename='ClusterDict.joblib'):
+        self.cluster_dict = load(filename)
+        return self.cluster_dict
+
+    def _compute_clusters(self, loader, clustering, save_labels):
         self.cluster_dict = {}
 
-        i = 0
+        i = 1
         curr_file = ""
         for files, batch in loader:
             preds = clustering.predict(batch)
@@ -90,14 +98,17 @@ class ReviewKMeans():
                 #Reset index when changing file
                 if files[j] != curr_file:
                     curr_file = files[j]
-                    i = 0                
+                    i = 1             
                 self.cluster_dict[files[j] + ' - ' + str(i)] = preds[j]
                 i = i + 1
 
-        print(self.cluster_dict)
+        if save_labels:
+            dump(self.cluster_dict, "ClusterDict.joblib")
+
+        return self.cluster_dict      
 
 
-    def MB_Spherical_KMeans(self, k, batch_size=2048, save=True):
+    def MB_Spherical_KMeans(self, k, batch_size=2048, save_model=True, save_labels=True):
 
         loader = self._get_embeddingloader(batch_size)        
         clustering = MiniBatchKMeans(n_clusters=k, batch_size=batch_size)
@@ -106,11 +117,13 @@ class ReviewKMeans():
             normalize(batch)
             clustering.partial_fit(batch)
 
+        self.model = clustering
         if save:
             dump(clustering, "KMeansModel.joblib")
 
-        self._compute_clusters(loader, clustering)
+        cluster_dict = self._compute_clusters(loader, clustering, save_labels)
 
+        return self.model, cluster_dict
 
 
     def elbow_plot(self, min_k=20, max_k=300, step=20, notification_step=100, batch_size=2048):
@@ -126,7 +139,7 @@ class ReviewKMeans():
                 normalize(batch)
                 clustering.partial_fit(batch)
 
-
             ssq.append(clustering.inertia_)
 
-        sns.lineplot(np.arange(min_k,max_k,step), ssq)
+
+        sns.lineplot(np.arange(min_k,max_k,step), ssq).set_title("KMeans Inertia Elbow Plot")
