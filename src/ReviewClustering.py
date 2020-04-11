@@ -118,7 +118,7 @@ class ReviewKMeans():
             clustering.partial_fit(batch)
 
         self.model = clustering
-        if save:
+        if save_model:
             dump(clustering, "KMeansModel.joblib")
 
         cluster_dict = self._compute_clusters(loader, clustering, save_labels)
