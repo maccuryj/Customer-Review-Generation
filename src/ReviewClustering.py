@@ -91,12 +91,9 @@ class ReviewKMeans():
         loader = self._get_embeddingloader(batch_size)        
         clustering = MiniBatchKMeans(n_clusters=k, batch_size=batch_size)
 
-        for batch in loader:
+        for f, batch in loader:
             print(batch)
             #Preserve file processing order, so indices can be matched
-            if f != file:
-                file = f
-                files.append(file)
 
             normalize(batch)
             clustering.partial_fit(batch)
