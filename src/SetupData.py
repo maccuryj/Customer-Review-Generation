@@ -133,6 +133,8 @@ class SetupData():
                 print("Processed: " , n_reviews/i, "%")
 
             encoding = model.encode(rev)
+            print('encoding size: ', len(encoding))
+            print('shape of embeddings: ', embeddings.shape)
 
             for j, enc in enumerate(encoding):
                 embeddings[batch_size*i+j] = enc
