@@ -69,11 +69,12 @@ class ReviewEmbeddingDataset(IterableDataset):
 
 class ReviewKMeans():
 
-    def __init__(self, files):
+    def __init__(self, data_folder, files):
         self.files = files
+        self.data_folder = data_folder
 
     def _get_embeddingloader(self, batch_size):
-        dataset = ReviewEmbeddingDataset(self.files)
+        dataset = ReviewEmbeddingDataset(self.data_folder, self.files)
         self.loader = DataLoader(dataset, batch_size=batch_size)
 
         return self.loader
