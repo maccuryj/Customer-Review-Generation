@@ -85,7 +85,7 @@ class ReviewKMeans():
 
     def MB_Spherical_KMeans(self, k, batch_size=2048, save=True):
 
-        loader = self.get_embeddingloader()        
+        loader = self._get_embeddingloader()        
         clustering = MiniBatchKMeans(n_clusters=k, batch_size=batch_size)
         normalizer = Normalizer(copy=False)
 
