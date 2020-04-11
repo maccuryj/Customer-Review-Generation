@@ -94,7 +94,7 @@ class ReviewKMeans():
                 self.cluster_dict[files[j] + ' - ' + str(i)] = preds[j]
                 i = i + 1
 
-        print(cluster_dict)
+        print(self.cluster_dict)
 
 
     def MB_Spherical_KMeans(self, k, batch_size=2048, save=True):
