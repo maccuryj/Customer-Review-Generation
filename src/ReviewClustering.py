@@ -91,11 +91,10 @@ class ReviewKMeans():
                 #Reset index when changing file
                 if file[j] != curr_file:
                     curr_file = file[j]
-                    i = 0
+                    i = 0                
+                self.cluster_dict[file[j] + ' - ' + str(i)] = preds[j]
+                i = i + 1
 
-                
-                    self.cluster_dict[file[j] + ' - ' + str(i)] = preds[j]
-                    i = i + 1
         print(cluster_dict)
 
 
