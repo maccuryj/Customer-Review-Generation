@@ -13,6 +13,10 @@ sns.set(rc={'figure.figsize':(11.7,8.27)})
 from ReviewLoader import ReviewDataset
 
 class ReviewClustering():
+    """
+    Class created mostly to test clustering with a subset of the data.
+    Provides helper function for retrieval and sampling of review data.
+    """
 
     def __init__(review_dir):
          self.review_dir = review_dir 
@@ -67,6 +71,7 @@ class ReviewEmbeddingDataset(IterableDataset):
     def __iter__(self):
         return self.get_stream()
 
+# maybe save model, dict, etc.. in other folder
 class ReviewKMeans():
 
     def __init__(self, data_folder, files):
@@ -143,3 +148,22 @@ class ReviewKMeans():
 
 
         sns.lineplot(np.arange(min_k,max_k,step), ssq).set_title("KMeans Inertia Elbow Plot")
+
+    def test_indices(self, file, i):
+        embeddings = np.load(file)
+        emb = embeddings[1:i+1]
+        del(embeddings)
+        
+        preds = self.model.predict(emb)
+        print(pred)
+        labels = []
+        for i in range(1:i+1):
+            labels.append(self.cluster_dict[file + ' - ' + i])
+        print(labels)
+        if pred == labels:
+            return True
+        else:
+            return False
+
+        
+
