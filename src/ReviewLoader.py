@@ -78,7 +78,7 @@ class ProductReviews():
         for word in self.word2id:
             self.id2word[self.word2id[word]] = word
 
-    def get_reviewloader(self, batch_size, files, embedding_method='nnEmbedding', embedding_dim=256):
+    def get_reviewloader(self, batch_size, files, embedding_method='nnEmbedding', embedding_dim=256, cluster_label_filename='ClusterDict.joblib'):
         """
         Creates PyTorch Dataloader for reviews
 
@@ -93,8 +93,10 @@ class ProductReviews():
             raise ValueError("Invalid embedding_method argument")
         if embedding_method == 'onehot':
             embedding_dim = len(self.word2id)
+
+        cluster_labels = self.load_cluster_labels(cluster_label_filename)        
         embedder = Embedder(embedding_method, len(self.word2id), embedding_dim)
-        collator = Collator(self.word2id, embedder)
+        collator = Collator(self.word2id, embedder, cluster_labels)
         loader = DataLoader(dataset, batch_size=batch_size, collate_fn=collator)
 
         return loader
@@ -156,7 +158,7 @@ class ReviewDataset(IterableDataset):
     def parse_file(self, file):        
         with open(os.path.join(self.data_folder, file), 'r') as review_file:
             reader = csv.reader(review_file)
-            for line in reader:             
+            for line in reader:                           
                 yield from line
 
     def get_stream(self):        
@@ -208,7 +210,7 @@ class Embedder:
 
 class Collator():
     
-    def __init__(self, encoding, embedder):
+    def __init__(self, encoding, embedder, cluster_labels):
         """
             encoding: word2id dictionary
             embedder: instance of class Embedder
@@ -224,6 +226,7 @@ class Collator():
         Y = []
 
         for line in batch:
+            print(line)
             # Represent the line (review) as a list of integers
             encoded_line = [self.encoding[word.lower()] if word.lower() in self.encoding.keys()
             else self.encoding["<UNK>"]
