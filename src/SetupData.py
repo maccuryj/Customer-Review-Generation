@@ -28,7 +28,13 @@ class SetupData():
         n_test_reviews (int):               Number of test reviews per product dataset
     """
 
-    def __init__(self, data_folder, datasets, n_train_reviews, n_test_reviews, create_dir=False):
+    def __init__(self, data_folder, datasets, n_train_reviews, n_test_reviews, create_dir=True):
+        """
+        Assignment of class attributes and creation of review folder in case it does not yet exist
+
+        Args:
+            create_dir (bool):              Set True to create directory on first run
+        """
         self.data_folder = data_folder
         self.datasets = datasets
         self.n_train_reviews = n_train_reviews
@@ -48,6 +54,14 @@ class SetupData():
         return s
 
     def _filter_review(self, review):
+        """
+        Part of initial review preprocessing. The reviews are filtered and only those are kept that
+        have 2 of the three: Noun, Verb, Adjective.
+        Reviews are trimmed to two phrases.
+
+        Args:
+        review (str):                       Single review string
+        """
         tokenized_review = nlp(review)
         noun = 0
         verb = 0
@@ -74,6 +88,14 @@ class SetupData():
             return -1
 
     def _save_reviews(self, reviews, filename, filetype='csv'):
+        """
+        Helper function to save reviews both as .csv and .npy.
+        
+        Args:
+            reviews (str []):               Set of reviews to be stored on disk
+            filename (str):                 Review set filename, in our example the product set and train/test
+            filetype (str):                 Type of file to save (either .csv or .npy)
+        """
         if filetype not in ['csv', 'npy']:
             raise ValueError('filetype argument not valid')
         else:
@@ -89,6 +111,13 @@ class SetupData():
 
 
     def _reviews_json2csv(self, dataset):
+        """
+        Builds the review .csv files from the .json.gz zipped files from the online Amazon Review corpus.
+        Preprocessing and filtering of reviews takes place in this function.
+
+        Args:
+            dataset (str):                  Name (product) of dataset to be processed
+        """
         train_reviews = []
         test_reviews = []
         i = 0
@@ -115,12 +144,25 @@ class SetupData():
         return
 
     def create_csv_files(self):
+        """
+        Runs the .csv file creation processes on the set of supplied datasets
+        """
         for dataset in self.datasets:
             self._reviews_json2csv(dataset)            
 
 
     def _reviews2BERT(self, dataset, n_reviews, batch_size, model):
-        
+        """
+        Store BERT Embeddings built from the reviews taken from the .csv files
+        These embeddings are used for clustering purposes
+        A DataLoader is used to retrieve the reviews from the .csv files to avoid memory overload
+
+        Args:
+            dataset (str):                      Product name of dataset
+            n_reviews (int):                    Number of reviews that are processed in the given dataset
+            batch_size (int):                   Size of batches loaded from the DataLoader
+            model (sentence_transformer):       BERT Embedding encoder model
+        """
         batch_size = batch_size
 
         print("Processing: ", dataset)
@@ -142,6 +184,12 @@ class SetupData():
         return
 
     def create_embedding_files(self, batch_size):
+        """
+        Runs the BERT embedding file creation processes on the set of supplied datasets
+
+        Args:
+            batch_size (int):                   Size of batches to be loaded from the DataLoader
+        """
         model = SentenceTransformer('bert-base-nli-mean-tokens')
         use_cuda = torch.cuda.is_available()
         device = torch.device("cuda:0" if use_cuda else "cpu")
@@ -162,6 +210,11 @@ class SetupData():
         This function tests whether the indices in the embedding files match those in the
         .csv files. This is important, as those indices are later used for matching reviews
         with their cluster.
+
+        Args:
+            dataset (str):                      Product name of dataset
+            i (int):                            Index of review until which comparison is made
+            atol (float):                       Very small floating point number, supplied as fault tolerance for value comparison
         """
         
         reviews = []
