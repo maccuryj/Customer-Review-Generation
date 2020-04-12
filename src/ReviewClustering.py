@@ -55,6 +55,11 @@ class ReviewClustering():
         return samples
 
 class ReviewEmbeddingDataset(IterableDataset):
+    """
+    Dataset class that serves as basis for the BERT Embedding Dataloader
+    used for clustering purposes, in order to iteratively retrieve batches from
+    disk and prevent memory overload.
+    """
 
     def __init__(self, data_folder, files):
         self.files = files
@@ -71,12 +76,15 @@ class ReviewEmbeddingDataset(IterableDataset):
     def __iter__(self):
         return self.get_stream()
 
-# maybe save model, dict, etc.. in other folder
+
 class ReviewKMeans():
 
-    def __init__(self, data_folder, files):
+    def __init__(self, data_folder, resource_folder, files):
         self.files = files
         self.data_folder = data_folder
+        self.resource_folder = resource_folder
+        if not os.path.exists(resource_folder):
+            os.mkdir(resource_folder)
 
     def _get_embeddingloader(self, batch_size):
         dataset = ReviewEmbeddingDataset(self.data_folder, self.files)
@@ -84,11 +92,15 @@ class ReviewKMeans():
 
         return self.loader
 
-    def load_model(self, filename='KMeansModel.joblib'):
+    def load_model(self, folder=None, filename='KMeansModel.joblib'):
+        if folder is None:
+            filename = os.path.join(folder, filename)
         self.model = load(filename)
         return self.model
 
-    def load_labels(self, filename='ClusterDict.joblib'):
+    def load_labels(self, folder=None, filename='ClusterDict.joblib'):
+        if folder is None:
+            filename = os.path.join(folder, filename)
         self.cluster_dict = load(filename)
         return self.cluster_dict
 
@@ -108,7 +120,7 @@ class ReviewKMeans():
                 i = i + 1
 
         if save_labels:
-            dump(self.cluster_dict, "ClusterDict.joblib")
+            dump(self.cluster_dict, os.path.join(self.resource_dir, "ClusterDict.joblib"))
 
         return self.cluster_dict      
 
@@ -124,7 +136,7 @@ class ReviewKMeans():
 
         self.model = clustering
         if save_model:
-            dump(clustering, "KMeansModel.joblib")
+            dump(clustering, os.path.join(self.resource_dir, "KMeansModel.joblib"))
 
         cluster_dict = self._compute_clusters(loader, clustering, save_labels)
 
