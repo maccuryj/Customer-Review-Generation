@@ -89,7 +89,11 @@ class ProductReviews():
         """
         dataset = ReviewDataset(files)
 
-        embedder = Embedder(embedding_method, len(word2id), )
+        if embedding_method not in ['nnEmbedding', 'onehot']:
+            raise ValueError("Invalid embedding_method argument")
+        if embedding_method = 'onehot':
+            embedding_dim = len(self.word2id)
+        embedder = Embedder(embedding_method, len(self.word2id), embedding_dim)
         collator = Collator(self.word2id, embedder)
         loader = DataLoader(dataset, batch_size=batch_size, collate_fn=collator)
 
