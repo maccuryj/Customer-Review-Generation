@@ -71,6 +71,16 @@ class ProductReviews():
                 self.word2id[tok] = encoding_size + i
                 i += 1
 
+    def _cluster_encodings(self):
+        """
+        Add the cluster start tokens to the word encoding
+        """
+        k = len(set(self._cluster_encodings))
+        encoding_size = len(self.word2id)
+
+        for i in range(k):
+            self.word2id["<SOR >" + str(encoding_size + i)]
+
     def create_decoding(self):
         """
         Create the word decoding dictionary from the encoding dictionary
@@ -233,7 +243,8 @@ class Collator():
             else self.encoding["<UNK>"]
             for word in line.split(' ')]
             # Change cluster dictionary filename format
-            start_tag = "<SOR " + str(self.cluster_labels[f[:-3] + 'npy - ' + i]) + ">"
+            start_tag = "<SOR " + str(self.cluster_labels[f[:-3] + 'npy - ' + str(i)]) + ">"
+            print(type(start_tag))
             encoded_line.insert(0, self.encoding["<SOR>"])
             encoded_line.append(self.encoding["<EOR>"])
 
