@@ -154,7 +154,7 @@ class ReviewDataset(IterableDataset):
         self.data_folder = data_folder
 
     def parse_file(self, file):
-        with open(os.path.join(data_folder, file), 'r') as review_file:
+        with open(os.path.join(self.data_folder, file), 'r') as review_file:
             reader = csv.reader(review_file)
             for line in reader:             
                 yield from line
