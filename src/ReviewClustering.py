@@ -153,13 +153,12 @@ class ReviewKMeans():
         embeddings = np.load(os.path.join(self.data_folder, file))
         emb = embeddings[:i]
         del(embeddings)
-        print(emb)
         preds = self.model.predict(emb)
-        print(preds)
+        
         labels = []
         for j in range(1, i+1):
             labels.append(self.cluster_dict[file + ' - ' + str(j)])
-        print(labels)
+        
         if np.array_equal(preds, np.array(labels)):
             return True
         else:
