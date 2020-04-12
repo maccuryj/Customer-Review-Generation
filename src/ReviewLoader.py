@@ -203,6 +203,8 @@ class Embedder:
         
         if method == "onehot":
             if dict_size != embedding_dim:
+                print(dict_size)
+                print(embedding_dim)
                 raise Exception("If using one-hot, dict_size must equal embed_dim!")
         
         if method == "nnEmbedding":
