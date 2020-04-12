@@ -57,7 +57,8 @@ class ReviewClustering():
 class ReviewEmbeddingDataset(IterableDataset):
     """
     Dataset class that serves as basis for the BERT Embedding Dataloader
-    used for clustering purposes, in order to iteratively retrieve batches from
+    used for clustering purposes.
+    Implemented as IterableDataset in order to iteratively retrieve batches from
     disk and prevent memory overload.
     """
 
@@ -66,11 +67,18 @@ class ReviewEmbeddingDataset(IterableDataset):
         self.data_folder = data_folder
 
     def parse_file(self, file):
+        """
+        Reads from the .npy embedding files and yields a file vector
+        together with the embeddings
+        """
         embeddings = np.load(os.path.join(self.data_folder, file))
         for i, emb in enumerate(embeddings):
             yield file, emb
 
-    def get_stream(self):        
+    def get_stream(self):   
+        """
+        Implementation of stream over provided embedding files
+        """     
         return chain.from_iterable(map(self.parse_file, self.files))
 
     def __iter__(self):
@@ -78,8 +86,25 @@ class ReviewEmbeddingDataset(IterableDataset):
 
 
 class ReviewKMeans():
+    """
+    Clustering process with MiniBatchKMeans
+    Includes methods to find optimal K,
+    save or load models and ultimately store cluster labels
+
+    Attributes:
+        data_folder (str):                  filename of review data folder
+        resource_folder (str):              filename of resource folder
+        files (str []):                     set of review dataset filenames
+        loader (DataLoader):                DataLoader for review embeddings
+        model (MiniBatchKMeans):            MiniBatchKMeans clustering model
+        cluster_dict (dict):                dictionary of cluster labels
+    """
 
     def __init__(self, data_folder, resource_folder, files):
+        """
+        Assignment of class attributes and creation of resource folder to store model 
+        and dictionary, in case it does not yet exist
+        """
         self.files = files
         self.data_folder = data_folder
         self.resource_folder = resource_folder
@@ -87,24 +112,53 @@ class ReviewKMeans():
             os.mkdir(resource_folder)
 
     def _get_embeddingloader(self, batch_size):
+        """
+        Returns a DataLoader for review embeddings
+
+        Args:
+            batch_size (int):               batch size for embedding DataLoader
+        """
         dataset = ReviewEmbeddingDataset(self.data_folder, self.files)
         self.loader = DataLoader(dataset, batch_size=batch_size)
 
         return self.loader
 
     def load_model(self, folder=None, filename='KMeansModel.joblib'):
+        """
+        Load a model from disk.
+
+        Args:
+            folder (str):                   name of folder containing file (generally resource_folder)
+            filename (str):                 name of file containing the model
+        """        
         if folder is None:
             filename = os.path.join(folder, filename)
         self.model = load(filename)
         return self.model
 
     def load_labels(self, folder=None, filename='ClusterDict.joblib'):
+        """
+        Load cluster labels from disk.
+
+        Args:
+            folder (str):                   name of folder containing file (generally resource_folder)
+            filename (str):                 name of file containing the cluster labels
+        """        
         if folder is None:
             filename = os.path.join(folder, filename)
         self.cluster_dict = load(filename)
         return self.cluster_dict
 
-    def _compute_clusters(self, loader, clustering, save_labels):
+    def _compute_clusters(self, loader, clustering, save_labels=False):
+        """
+        Computes the cluster labels given a KMeans model and stores them on disk
+
+        Args:
+            loader (DataLoader):            DataLoader for review embeddings
+            clustering (model):             KMeans model
+            save_labels (bool):             Decides whether cluster labels should be saved
+
+        """
         self.cluster_dict = {}
 
         i = 1
@@ -126,7 +180,15 @@ class ReviewKMeans():
 
 
     def MB_Spherical_KMeans(self, k, batch_size=2048, save_model=True, save_labels=True):
-
+        """
+        MiniBatchKMeans model, clustering the normalized BERT Embeddings.
+        
+        Args:
+            k (int):                        Number of resulting clusters
+            batch_size (int):               Size of batches returned by the dataloader
+            save_model (bool):              Decides whether model should be saved
+            save_labels (bool):             Decides whether cluster labels should be saved
+        """
         loader = self._get_embeddingloader(batch_size)        
         clustering = MiniBatchKMeans(n_clusters=k, batch_size=batch_size)
 
@@ -144,6 +206,18 @@ class ReviewKMeans():
 
 
     def elbow_plot(self, min_k=20, max_k=300, step=20, notification_step=100, batch_size=2048):
+        """
+        Creates an elbow plot for the KMeans clustering
+        based on the provided K values
+        and the resulting within-cluster SSQ
+
+        Args:
+            min_k (int):
+            max_k (int):
+            step (int):
+            notification_step (int):
+            batch_size (int):
+        """
         ssq = []
         n_steps = (max_k-min_k)/step
         loader = self._get_embeddingloader(batch_size) 
