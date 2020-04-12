@@ -107,7 +107,7 @@ class ProductReviews():
         if embedding_method == 'onehot':
             embedding_dim = len(self.word2id)
 
-        cluster_labels = self.load_cluster_labels(cluster_label_filename)   
+        cluster_labels = self.load_cluster_labels(self.resource_dir, cluster_label_filename)   
         self._cluster_encodings()
 
         embedder = Embedder(embedding_method, len(self.word2id), embedding_dim)
