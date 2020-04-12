@@ -158,8 +158,8 @@ class ReviewDataset(IterableDataset):
     def parse_file(self, file):        
         with open(os.path.join(self.data_folder, file), 'r') as review_file:
             reader = csv.reader(review_file)
-            for line in reader:                           
-                yield file, line[0]
+            for i, line in enumerate(reader):                           
+                yield i, file, line[0]
 
     def get_stream(self):        
         return chain.from_iterable(map(self.parse_file, self.files))
@@ -212,8 +212,9 @@ class Collator():
     
     def __init__(self, encoding, embedder, cluster_labels):
         """
-            encoding: word2id dictionary
-            embedder: instance of class Embedder
+            encoding (dict):                word2id dictionary
+            embedder (Embedder):            instance of class Embedder
+            cluster_labels (dict):          cluster label dictionary 
         """
         self.encoding = encoding
         self.dict_size = len(encoding)
@@ -225,13 +226,13 @@ class Collator():
         X_len = []
         Y = []
 
-        for f, line in batch:
-            print(f)
-            print(line)
+        for i, f, line in batch:            
             # Represent the line (review) as a list of integers
             encoded_line = [self.encoding[word.lower()] if word.lower() in self.encoding.keys()
             else self.encoding["<UNK>"]
             for word in line.split(' ')]
+            # Change cluster dictionary filename format
+            start_tag = "<SOR " + self.cluster_labels[f[:-3] + 'npy - ' + i] + ">"
             encoded_line.insert(0, self.encoding["<SOR>"])
             encoded_line.append(self.encoding["<EOR>"])
 
@@ -252,8 +253,11 @@ class Collator():
             X.append(x)
             X_len.append(len(encoded_line[:-1]))
             Y.append(y)
-        
-        X_padded = pad_sequence(X, batch_first=True, padding_value=0)
+        try:
+            X_padded = pad_sequence(X, batch_first=True, padding_value=0)
+        except Exception:
+            print(line)
+            print(X)
         Y_padded = pad_sequence(Y, batch_first=True, padding_value=0)  
         #X_packed = pack_padded_sequence(X_padded, X_len, batch_first=True, enforce_sorted=False)
         
