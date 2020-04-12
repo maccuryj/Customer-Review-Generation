@@ -219,6 +219,7 @@ class Collator():
         self.encoding = encoding
         self.dict_size = len(encoding)
         self.embedder = embedder
+        self.cluster_labels = cluster_labels
 
     def __call__(self, batch):
         
