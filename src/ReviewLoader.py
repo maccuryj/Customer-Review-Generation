@@ -152,7 +152,6 @@ class ReviewDataset(IterableDataset):
     def __init__(self, data_folder, files):
         self.files = files
         self.data_folder = data_folder
-        print(self.data_folder)
 
     def parse_file(self, file):        
         with open(os.path.join(self.data_folder, file), 'r') as review_file:
@@ -164,7 +163,6 @@ class ReviewDataset(IterableDataset):
         return chain.from_iterable(map(self.parse_file, self.files))
 
     def __iter__(self):
-        print(os.path.join(self.data_folder, file))
         return self.get_stream()
 
 
