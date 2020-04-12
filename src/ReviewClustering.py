@@ -150,7 +150,7 @@ class ReviewKMeans():
         sns.lineplot(np.arange(min_k,max_k,step), ssq).set_title("KMeans Inertia Elbow Plot")
 
     def test_indices(self, file, i):
-        embeddings = np.load(file)
+        embeddings = np.load(os.path.join(self.data_folder, file))
         emb = embeddings[1:i+1]
         del(embeddings)
         print(emb)
