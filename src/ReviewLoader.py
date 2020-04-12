@@ -244,9 +244,8 @@ class Collator():
             for word in line.split(' ')]
             # Change cluster dictionary filename format
             start_tag = "<SOR " + str(self.cluster_labels[f[:-3] + 'npy - ' + str(i + 1)]) + ">"
-            encoded_line.insert(0, self.encoding["<SOR>"])
+            encoded_line.insert(0, self.encoding[start_tag])
             encoded_line.append(self.encoding["<EOR>"])
-            print(encoded_line)
 
             # Count the number of <UNK> tokens in the encoded_line (=review). If there are too many
             # unkowns, don't include this review in training
