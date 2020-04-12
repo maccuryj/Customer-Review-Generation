@@ -225,7 +225,8 @@ class Collator():
         X_len = []
         Y = []
 
-        for line in batch:
+        for f, line in batch:
+            print(f)
             print(line)
             # Represent the line (review) as a list of integers
             encoded_line = [self.encoding[word.lower()] if word.lower() in self.encoding.keys()
