@@ -151,16 +151,16 @@ class ReviewKMeans():
 
     def test_indices(self, file, i):
         embeddings = np.load(os.path.join(self.data_folder, file))
-        emb = embeddings[1:i+1]
+        emb = embeddings[:i]
         del(embeddings)
         print(emb)
         preds = self.model.predict(emb)
         print(preds)
         labels = []
-        for i in range(1, i+1):
-            labels.append(self.cluster_dict[file + ' - ' + str(i)])
+        for j in range(i+1):
+            labels.append(self.cluster_dict[file + ' - ' + str(j)])
         print(labels)
-        if pred == labels:
+        if preds == labels:
             return True
         else:
             return False
