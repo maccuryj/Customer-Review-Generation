@@ -79,7 +79,7 @@ class ProductReviews():
         encoding_size = len(self.word2id)
 
         for i in range(k):
-            self.word2id["<SOR >" + str(encoding_size + i)]
+            self.word2id["<SOR >" + str(i)] = encoding_size + i
 
     def create_decoding(self):
         """
@@ -126,7 +126,6 @@ class ProductReviews():
 
 
     def load_vocab(self, filename):
-        # TODO: Change to joblib
         """
         Load a vocabulary from disk.
 
@@ -221,7 +220,8 @@ class Embedder:
 class Collator():
     
     def __init__(self, encoding, embedder, cluster_labels):
-        """
+        """        
+        Args:
             encoding (dict):                word2id dictionary
             embedder (Embedder):            instance of class Embedder
             cluster_labels (dict):          cluster label dictionary 
