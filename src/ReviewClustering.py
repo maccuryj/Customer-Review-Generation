@@ -120,7 +120,7 @@ class ReviewKMeans():
                 i = i + 1
 
         if save_labels:
-            dump(self.cluster_dict, os.path.join(self.resource_dir, "ClusterDict.joblib"))
+            dump(self.cluster_dict, os.path.join(self.resource_folder, "ClusterDict.joblib"))
 
         return self.cluster_dict      
 
@@ -136,7 +136,7 @@ class ReviewKMeans():
 
         self.model = clustering
         if save_model:
-            dump(clustering, os.path.join(self.resource_dir, "KMeansModel.joblib"))
+            dump(clustering, os.path.join(self.resource_folder, "KMeansModel.joblib"))
 
         cluster_dict = self._compute_clusters(loader, clustering, save_labels)
 
