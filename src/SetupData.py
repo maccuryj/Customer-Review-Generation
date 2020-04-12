@@ -43,15 +43,85 @@ class SetupData():
         if create_dir is True and not os.path.exists(data_folder):
             os.mkdir(data_folder)
 
-    def _adjust_string(self, s):
+    def _clean_review_syntactic(self, s):
         """
-        Lowercase, trim, and remove non-letter characters
-        https://pytorch.org/tutorials/intermediate/seq2seq_translation_tutorial.html
+        cleans review as string syntactically,
+        maps numbers to "<NUM>", maps punctuation to "."
+
+        Args:
+        s (str):                       Single review string
         """
+        # specific words (capitalisation)
+        s = re.sub('(U.S.|USA)', 'United States', s)
+        s = re.sub('M(s|rs)\s\.?\s?[a-zA-Z]\w*', 'misses', s)
+        s = re.sub('Mr\s\.?\s?[a-zA-Z]\w*', 'mister', s)
+
+        # general
         s = s.lower().strip()
-        s = re.sub(r"([.!?])", r" \1", s)
-        s = re.sub(r"[^a-zA-Z.!?]+", r" ", s)
-        return s
+
+        # specific words (lower)
+        s = re.sub('&', 'and', s) 
+        s = re.sub("aren't", "are not", s) 
+        s = re.sub("can't", "cannot", s) 
+        s = re.sub("couldn't", "could not", s) 
+        s = re.sub("didn't", "did not", s) 
+        s = re.sub("doesn't|doesnt", "does not", s) 
+        s = re.sub("don't|dont", "do not", s)
+        s = re.sub("hadn't", "had not", s) 
+        s = re.sub("hasn't", "has not", s) 
+        s = re.sub("haven't", "have not", s) 
+        s = re.sub("he'd", "he would", s) 
+        s = re.sub("he'll", "he will", s) 
+        s = re.sub("he's", "he is", s) 
+        s = re.sub("i'd", "i would", s) 
+        s = re.sub("i'll", "i will", s) 
+        s = re.sub("i'm|im", "i am", s) 
+        s = re.sub("i've", "i have", s) 
+        s = re.sub("isn't", "is not", s) 
+        s = re.sub("it's", "it is", s)
+        s = re.sub("let's", "let us", s)  
+        s = re.sub("mustn't", "must not", s)  
+        s = re.sub("shan't", "shall not", s)  
+        s = re.sub("she'd", "she would", s)  
+        s = re.sub("she'll", "she will", s)  
+        s = re.sub("she's", "she is", s)  
+        s = re.sub("shouldn't", "should not", s)  
+        s = re.sub("that's", "that is", s)  
+        s = re.sub("there's", "there is", s)  
+        s = re.sub("they'd", "they would", s)  
+        s = re.sub("they'll", "they will", s)
+        s = re.sub("they're", "they are", s)  
+        s = re.sub("they've", "they have", s)  
+        s = re.sub("we'd", "we would", s)  
+        s = re.sub("we're", "we are", s)  
+        s = re.sub("we've", "we have", s)  
+        s = re.sub("weren't", "were not", s)  
+        s = re.sub("what'll", "what will", s)  
+        s = re.sub("what're", "what are", s) 
+        s = re.sub("what's", "what is", s) 
+        s = re.sub("what've	", "what have", s) 
+        s = re.sub("where's", "	where is", s) 
+        s = re.sub("who'd", "who would", s) 
+        s = re.sub("who'll", "who will", s) 
+        s = re.sub("who're", "who are", s) 
+        s = re.sub("who's", "who is", s) 
+        s = re.sub("who've", "who have", s) 
+        s = re.sub("won't", "will not", s) 
+        s = re.sub("wouldn't", "would not", s) 
+        s = re.sub("you'd", "you would", s) 
+        s = re.sub("you'll", "you will", s) 
+        s = re.sub("you're", "you are", s) 
+        s = re.sub("you've", "you have", s)
+
+        # punctuation: map 
+        s = re.sub('\.+|!+|\?+', '.', s)
+
+        # punctuation: delete
+        s = re.sub(r"[^0-9a-zA-Z<>\.]+", " ", s)
+
+        # numbers
+        #s = re.sub('\d+([a-z]+)|([a-z])+\d+|\d+|[a-z]+\d+[a-z]+', '<NUM>', s)
+        return self.s
 
     def _filter_review(self, review):
         """
@@ -62,6 +132,7 @@ class SetupData():
         Args:
         review (str):                       Single review string
         """
+        review  = _clean_review_syntactic(review) 
         tokenized_review = nlp(review)
         noun = 0
         verb = 0
@@ -83,7 +154,7 @@ class SetupData():
 
         if noun + verb + adj > 1:
             s = ' '.join(tok.text for tok in tokenized_review)
-            return self._adjust_string(s)
+            return self.s
         else:
             return -1
 
