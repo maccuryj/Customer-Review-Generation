@@ -246,6 +246,6 @@ class Collator():
         
         X_padded = pad_sequence(X, batch_first=True, padding_value=0)
         Y_padded = pad_sequence(Y, batch_first=True, padding_value=0)  
-        X_packed = pack_padded_sequence(X_padded, X_len, batch_first=True, enforce_sorted=False)
+        #X_packed = pack_padded_sequence(X_padded, X_len, batch_first=True, enforce_sorted=False)
         
-        return X_packed, Y_padded
+        return X_padded, X_len, Y_padded
