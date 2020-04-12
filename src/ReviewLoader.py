@@ -243,7 +243,7 @@ class Collator():
             else self.encoding["<UNK>"]
             for word in line.split(' ')]
             # Change cluster dictionary filename format
-            start_tag = "<SOR " + str(self.cluster_labels[f[:-3] + 'npy - ' + str(i)]) + ">"
+            start_tag = "<SOR " + str(self.cluster_labels[f[:-3] + 'npy - ' + str(i + 1)]) + ">"
             print(type(start_tag))
             encoded_line.insert(0, self.encoding["<SOR>"])
             encoded_line.append(self.encoding["<EOR>"])
