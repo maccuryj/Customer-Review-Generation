@@ -78,22 +78,24 @@ class ProductReviews():
         for word in self.word2id:
             self.id2word[self.word2id[word]] = word
 
-    def get_reviewloader(self, batch_size, files):
+    def get_reviewloader(self, batch_size, files, embedding_method='nnEmbedding', embedding_dim=256):
         """
         Creates PyTorch Dataloader for reviews
 
         Args:
             batch_size (int):               Batch size for DataLoader
+            files (str []:)                 Files to be processed by the DataLoader
+            embedding_method (str):         Input Embedding (one-hot or nn.Embedding)
         """
         dataset = ReviewDataset(files)
 
-        collator = Collator(self.word2id)
+        embedder = Embedder(embedding_method, len(word2id), )
+        collator = Collator(self.word2id, embedder)
         loader = DataLoader(dataset, batch_size=batch_size, collate_fn=collator)
 
         return loader
 
     def save_vocab(self, filename):
-        # TODO: Change to joblib
         """
         Save a vocabulary on disk.
 
