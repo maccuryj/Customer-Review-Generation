@@ -157,7 +157,7 @@ class ReviewKMeans():
         preds = self.model.predict(emb)
         print(preds)
         labels = []
-        for j in range(i+1):
+        for j in range(1, i+1):
             labels.append(self.cluster_dict[file + ' - ' + str(j)])
         print(labels)
         if preds == labels:
