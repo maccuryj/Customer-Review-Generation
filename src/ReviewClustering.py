@@ -160,7 +160,7 @@ class ReviewKMeans():
         for j in range(1, i+1):
             labels.append(self.cluster_dict[file + ' - ' + str(j)])
         print(labels)
-        if preds == labels:
+        if np.array_equal(preds, np.array(labels)):
             return True
         else:
             return False
