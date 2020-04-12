@@ -159,7 +159,7 @@ class ReviewDataset(IterableDataset):
         with open(os.path.join(self.data_folder, file), 'r') as review_file:
             reader = csv.reader(review_file)
             for line in reader:                           
-                yield from line
+                yield file, line[0]
 
     def get_stream(self):        
         return chain.from_iterable(map(self.parse_file, self.files))
