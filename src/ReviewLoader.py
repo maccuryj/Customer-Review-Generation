@@ -75,7 +75,7 @@ class ProductReviews():
         """
         Add the cluster start tokens to the word encoding
         """
-        k = len(set(self._cluster_encodings))
+        k = len(set(self.cluster_dict))
         encoding_size = len(self.word2id)
 
         for i in range(k):
