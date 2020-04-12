@@ -79,7 +79,7 @@ class ProductReviews():
         encoding_size = len(self.word2id)
 
         for i in range(k):
-            self.word2id["<SOR >" + str(i)] = encoding_size + i
+            self.word2id["<SOR " + str(i) + ">"] = encoding_size + i
 
     def create_decoding(self):
         """
