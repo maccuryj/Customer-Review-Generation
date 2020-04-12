@@ -152,6 +152,7 @@ class ReviewDataset(IterableDataset):
     def __init__(self, data_folder, files):
         self.files = files
         self.data_folder = data_folder
+        print(self.data_folder)
 
     def parse_file(self, file):        
         with open(os.path.join(self.data_folder, file), 'r') as review_file:
