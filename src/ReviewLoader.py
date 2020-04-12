@@ -250,7 +250,6 @@ class Collator():
             start_tag = "<SOR " + str(self.cluster_labels[f[:-3] + 'npy - ' + str(i + 1)]) + ">"
             encoded_line.insert(0, self.encoding[start_tag])
             encoded_line.append(self.encoding["<EOR>"])
-            print(encoded_line)
 
             # Count the number of <UNK> tokens in the encoded_line (=review). If there are too many
             # unkowns, don't include this review in training
@@ -272,8 +271,7 @@ class Collator():
         try:
             X_padded = pad_sequence(X, batch_first=True, padding_value=0)
         except Exception:
-            print(line)
-            print(X)
+            return -1
         Y_padded = pad_sequence(Y, batch_first=True, padding_value=0)  
         #X_packed = pack_padded_sequence(X_padded, X_len, batch_first=True, enforce_sorted=False)
         
