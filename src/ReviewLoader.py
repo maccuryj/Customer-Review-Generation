@@ -78,6 +78,7 @@ class ProductReviews():
         """
         k = len(set(self.cluster_dict))
         encoding_size = len(self.word2id)
+        print(k)
 
         for i in range(k):
             token = "<SOR " + str(i) + ">"
@@ -203,8 +204,6 @@ class Embedder:
         
         if method == "onehot":
             if dict_size != embedding_dim:
-                print(dict_size)
-                print(embedding_dim)
                 raise Exception("If using one-hot, dict_size must equal embed_dim!")
         
         if method == "nnEmbedding":
