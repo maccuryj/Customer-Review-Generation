@@ -67,7 +67,7 @@ class ProductReviews():
         tokens = ["<UNK>", "<SOR>", "<EOR>"]
         i = 0
         for tok in tokens:
-            if tok not in self.word2id.values():
+            if tok not in self.word2id.keys():
                 self.word2id[tok] = encoding_size + i
                 i += 1
 
@@ -79,7 +79,9 @@ class ProductReviews():
         encoding_size = len(self.word2id)
 
         for i in range(k):
-            self.word2id["<SOR " + str(i) + ">"] = encoding_size + i
+            token = "<SOR " + str(i) + ">"
+            if token not in self.word2id.keys():
+                self.word2id[token] = encoding_size + i
 
     def create_decoding(self):
         """
@@ -104,7 +106,9 @@ class ProductReviews():
         if embedding_method == 'onehot':
             embedding_dim = len(self.word2id)
 
-        cluster_labels = self.load_cluster_labels(cluster_label_filename)        
+        cluster_labels = self.load_cluster_labels(cluster_label_filename)   
+        self._cluster_encodings()
+
         embedder = Embedder(embedding_method, len(self.word2id), embedding_dim)
         collator = Collator(self.word2id, embedder, cluster_labels)
         loader = DataLoader(dataset, batch_size=batch_size, collate_fn=collator)
