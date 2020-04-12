@@ -25,8 +25,9 @@ class ProductReviews():
 
     """    
 
-    def __init__(self, review_dir):        
-        self.review_dir = review_dir              
+    def __init__(self, review_dir, resource_dir):        
+        self.review_dir = review_dir
+        self.resource_dir = resource_dir         
         self.word2id = {}
         self.id2word = {}
         self.encoding_filename = ""
@@ -144,7 +145,7 @@ class ProductReviews():
 
         return self.word2id
 
-    def load_cluster_labels(self, filename='ClusterDict.joblib'):
+    def load_cluster_labels(self, folder=None, filename='ClusterDict.joblib'):
         """
         Load a dictionary of cluster labels from disk.
 
@@ -153,6 +154,8 @@ class ProductReviews():
         """        
         if '.joblib' not in filename:
             filename = filename + '.joblib'
+        if folder is not None:
+            filename = os.path.join(folder, filename)
 
         self.cluster_dict = load(filename)
 
