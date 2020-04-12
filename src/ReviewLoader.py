@@ -87,7 +87,7 @@ class ProductReviews():
             files (str []:)                 Files to be processed by the DataLoader
             embedding_method (str):         Input Embedding (one-hot or nn.Embedding)
         """
-        dataset = ReviewDataset(files)
+        dataset = ReviewDataset(self.review_dir, files)
 
         if embedding_method not in ['nnEmbedding', 'onehot']:
             raise ValueError("Invalid embedding_method argument")
@@ -149,11 +149,12 @@ class ProductReviews():
 # as currently only supports single process.
 class ReviewDataset(IterableDataset):
 
-    def __init__(self, files):
+    def __init__(self, data_folder, files):
         self.files = files
+        self.data_folder = data_folder
 
     def parse_file(self, file):
-        with open(file, 'r') as review_file:
+        with open(os.path.join(data_folder, file), 'r') as review_file:
             reader = csv.reader(review_file)
             for line in reader:             
                 yield from line
