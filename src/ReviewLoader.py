@@ -97,7 +97,7 @@ class ProductReviews():
         for word in self.word2id:
             self.id2word[self.word2id[word]] = word
 
-    def get_reviewloader(self, batch_size, files, embedding_method='nnEmbedding', embedding_dim=256, cluster_labels):
+    def get_reviewloader(self, batch_size, files, cluster_labels, embedding_method='nnEmbedding', embedding_dim=256):
         """
         Creates PyTorch Dataloader for reviews
 
