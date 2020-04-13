@@ -53,7 +53,7 @@ class ProductReviews():
         
         if load_clusters:
             cluster_labels = self.load_cluster_labels(self.resource_dir, cluster_label_filename)   
-            self._cluster_encodings()     
+            self._cluster_encodings(cluster_labels)     
 
         return vectorizer, words
 
@@ -76,13 +76,13 @@ class ProductReviews():
                 self.word2id[tok] = encoding_size + i
                 i += 1
 
-    def _cluster_encodings(self):
+    def _cluster_encodings(self, cluster_labels):
         """
         Add the cluster start tokens to the word encoding
 
 
         """
-        k = len(set(self.cluster_dict.values()))
+        k = len(set(self.cluster_labels.values()))
         encoding_size = len(self.word2id)           
 
         for i in range(k):
@@ -97,7 +97,7 @@ class ProductReviews():
         for word in self.word2id:
             self.id2word[self.word2id[word]] = word
 
-    def get_reviewloader(self, batch_size, files, embedding_method='nnEmbedding', embedding_dim=256):
+    def get_reviewloader(self, batch_size, files, embedding_method='nnEmbedding', embedding_dim=256, cluster_labels):
         """
         Creates PyTorch Dataloader for reviews
 
@@ -160,9 +160,9 @@ class ProductReviews():
         if folder is not None:
             filename = os.path.join(folder, filename)
 
-        self.cluster_dict = load(filename)
+        cluster_labels = load(filename)
 
-        return self.cluster_dict
+        return cluster_labels
 
 
 
