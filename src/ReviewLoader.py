@@ -32,7 +32,7 @@ class ProductReviews():
         self.id2word = {}
         self.encoding_filename = ""
 
-    def create_vocabulary(self, files, max_features=10000, tfidf=False, load_clusters=True):
+    def create_vocabulary(self, files, max_features=10000, tfidf=False, load_clusters=True,  cluster_label_filename='ClusterDict.joblib'):
         """
         Make use of Term Frequency and (if set) Inverse Document Frequency to create a vocabulary
         for use in the RNN. The encoding is then adjusted and a decoding
@@ -97,7 +97,7 @@ class ProductReviews():
         for word in self.word2id:
             self.id2word[self.word2id[word]] = word
 
-    def get_reviewloader(self, batch_size, files, embedding_method='nnEmbedding', embedding_dim=256, cluster_label_filename='ClusterDict.joblib'):
+    def get_reviewloader(self, batch_size, files, embedding_method='nnEmbedding', embedding_dim=256):
         """
         Creates PyTorch Dataloader for reviews
 
