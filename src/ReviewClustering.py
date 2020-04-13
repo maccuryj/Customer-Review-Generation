@@ -132,7 +132,8 @@ class ReviewKMeans():
             filename (str):                 name of file containing the model
         """        
         if folder is None:
-            filename = os.path.join(folder, filename)
+            folder = self.resource_folder
+        filename = os.path.join(folder, filename)
         self.model = load(filename)
         return self.model
 
@@ -145,7 +146,8 @@ class ReviewKMeans():
             filename (str):                 name of file containing the cluster labels
         """        
         if folder is None:
-            filename = os.path.join(folder, filename)
+            folder = self.resource_folder
+        filename = os.path.join(folder, filename)
         self.cluster_dict = load(filename)
         return self.cluster_dict
 
