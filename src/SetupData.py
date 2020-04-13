@@ -132,7 +132,7 @@ class SetupData():
         Args:
         review (str):                       Single review string
         """
-        review  = _clean_review_syntactic(review) 
+        #review  = self._clean_review_syntactic(review) 
         tokenized_review = nlp(review)
         noun = 0
         verb = 0
