@@ -82,7 +82,7 @@ class ProductReviews():
 
 
         """
-        k = len(set(self.cluster_labels.values()))
+        k = len(set(cluster_labels.values()))
         encoding_size = len(self.word2id)           
 
         for i in range(k):
