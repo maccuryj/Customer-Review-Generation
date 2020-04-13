@@ -32,7 +32,7 @@ class ProductReviews():
         self.id2word = {}
         self.encoding_filename = ""
 
-    def create_vocabulary(self, files, max_features=10000, tfidf=False):
+    def create_vocabulary(self, files, max_features=10000, tfidf=False, load_clusters=True):
         """
         Make use of Term Frequency and (if set) Inverse Document Frequency to create a vocabulary
         for use in the RNN. The encoding is then adjusted and a decoding
@@ -49,7 +49,11 @@ class ProductReviews():
             self.word2id = vectorizer.vocabulary_
         
         self.adjust_encoding()
-        self.create_decoding()        
+        self.create_decoding()   
+        
+        if load_clusters:
+            cluster_labels = self.load_cluster_labels(self.resource_dir, cluster_label_filename)   
+            self._cluster_encodings()     
 
         return vectorizer, words
 
@@ -75,9 +79,11 @@ class ProductReviews():
     def _cluster_encodings(self):
         """
         Add the cluster start tokens to the word encoding
+
+
         """
         k = len(set(self.cluster_dict.values()))
-        encoding_size = len(self.word2id)        
+        encoding_size = len(self.word2id)           
 
         for i in range(k):
             token = "<SOR " + str(i) + ">"
@@ -106,9 +112,6 @@ class ProductReviews():
             raise ValueError("Invalid embedding_method argument")
         if embedding_method == 'onehot':
             embedding_dim = len(self.word2id)
-
-        cluster_labels = self.load_cluster_labels(self.resource_dir, cluster_label_filename)   
-        self._cluster_encodings()
 
         embedder = Embedder(embedding_method, len(self.word2id), embedding_dim)
         collator = Collator(self.word2id, embedder, cluster_labels)
