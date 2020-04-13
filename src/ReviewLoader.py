@@ -157,8 +157,9 @@ class ProductReviews():
         """        
         if '.joblib' not in filename:
             filename = filename + '.joblib'
-        if folder is not None:
-            filename = os.path.join(folder, filename)
+        if folder is None:
+            folder = self.resource_dir
+        filename = os.path.join(folder, filename)
 
         cluster_labels = load(filename)
 
