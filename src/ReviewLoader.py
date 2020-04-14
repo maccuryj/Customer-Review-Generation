@@ -113,6 +113,8 @@ class ProductReviews():
         if embedding_method == 'onehot':
             embedding_dim = len(self.word2id)
 
+        print(self.word2id['<UNK>'])
+
         embedder = Embedder(embedding_method, len(self.word2id), embedding_dim)
         collator = Collator(self.word2id, embedder, cluster_labels)
         loader = DataLoader(dataset, batch_size=batch_size, collate_fn=collator)
@@ -247,6 +249,10 @@ class Collator():
         X = []
         X_len = []
         Y = []
+
+        for k in self.encoding.keys():
+            if "<" in k:
+                print(k)
 
         for i, f, line in batch:            
             # Represent the line (review) as a list of integers
