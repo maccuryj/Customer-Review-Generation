@@ -60,7 +60,7 @@ class ProductReviews():
         if 0 in self.word2id.values():
             for word in self.word2id:
                 if self.word2id[word] == 0:
-                    self.word2id[word] == len(self.word2id)
+                    self.word2id[word] = len(self.word2id)
         self.word2id["<PAD>"] = 0
 
         encoding_size = len(self.word2id)
