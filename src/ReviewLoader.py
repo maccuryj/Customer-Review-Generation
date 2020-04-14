@@ -61,7 +61,7 @@ class ProductReviews():
         """
         Adjust the word encoding to include language tokens
         """
-        if 0 in self.word2id.values():
+        if '0' in self.word2id.values():
             for word in self.word2id:
                 if self.word2id[word] == 0:
                     self.word2id[word] == len(self.word2id)
