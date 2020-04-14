@@ -32,7 +32,7 @@ class ProductReviews():
         self.id2word = {}
         self.encoding_filename = ""
 
-    def create_vocabulary(self, files, max_features=10000, tfidf=False):
+    def create_vocabulary(self, files, max_features=10000, tfidf=False, load_clusters=True,  cluster_label_filename='ClusterDict.joblib'):
         """
         Make use of Term Frequency and (if set) Inverse Document Frequency to create a vocabulary
         for use in the RNN. The encoding is then adjusted and a decoding
@@ -48,8 +48,12 @@ class ProductReviews():
             words = vectorizer.fit_transform(f)
             self.word2id = vectorizer.vocabulary_
         
-        self.adjust_encoding()
-        self.create_decoding()        
+        self.adjust_encoding()          
+        
+        if load_clusters:
+            cluster_labels = self.load_cluster_labels(self.resource_dir, cluster_label_filename)   
+            self._cluster_encodings(cluster_labels)     
+        self.create_decoding()
 
         return vectorizer, words
 
@@ -57,7 +61,7 @@ class ProductReviews():
         """
         Adjust the word encoding to include language tokens
         """
-        if 0 in self.word2id.values():
+        if '0' in self.word2id.values():
             for word in self.word2id:
                 if self.word2id[word] == 0:
                     self.word2id[word] = len(self.word2id)
@@ -72,12 +76,14 @@ class ProductReviews():
                 self.word2id[tok] = encoding_size + i
                 i += 1
 
-    def _cluster_encodings(self):
+    def _cluster_encodings(self, cluster_labels):
         """
         Add the cluster start tokens to the word encoding
+
+
         """
-        k = len(set(self.cluster_dict.values()))
-        encoding_size = len(self.word2id)        
+        k = len(set(cluster_labels.values()))
+        encoding_size = len(self.word2id)           
 
         for i in range(k):
             token = "<SOR " + str(i) + ">"
@@ -91,7 +97,7 @@ class ProductReviews():
         for word in self.word2id:
             self.id2word[self.word2id[word]] = word
 
-    def get_reviewloader(self, batch_size, files, embedding_method='nnEmbedding', embedding_dim=256, cluster_label_filename='ClusterDict.joblib'):
+    def get_reviewloader(self, batch_size, files, cluster_labels, embedding_method='nnEmbedding', embedding_dim=256):
         """
         Creates PyTorch Dataloader for reviews
 
@@ -106,9 +112,6 @@ class ProductReviews():
             raise ValueError("Invalid embedding_method argument")
         if embedding_method == 'onehot':
             embedding_dim = len(self.word2id)
-
-        cluster_labels = self.load_cluster_labels(self.resource_dir, cluster_label_filename)   
-        self._cluster_encodings()
 
         embedder = Embedder(embedding_method, len(self.word2id), embedding_dim)
         collator = Collator(self.word2id, embedder, cluster_labels)
@@ -154,12 +157,13 @@ class ProductReviews():
         """        
         if '.joblib' not in filename:
             filename = filename + '.joblib'
-        if folder is not None:
-            filename = os.path.join(folder, filename)
+        if folder is None:
+            folder = self.resource_dir
+        filename = os.path.join(folder, filename)
 
-        self.cluster_dict = load(filename)
+        cluster_labels = load(filename)
 
-        return self.cluster_dict
+        return cluster_labels
 
 
 

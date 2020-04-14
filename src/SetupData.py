@@ -121,7 +121,7 @@ class SetupData():
 
         # numbers
         #s = re.sub('\d+([a-z]+)|([a-z])+\d+|\d+|[a-z]+\d+[a-z]+', '<NUM>', s)
-        return self.s
+        return s
 
     def _filter_review(self, review):
         """
@@ -132,7 +132,7 @@ class SetupData():
         Args:
         review (str):                       Single review string
         """
-        review  = _clean_review_syntactic(review) 
+        #review  = self._clean_review_syntactic(review) 
         tokenized_review = nlp(review)
         noun = 0
         verb = 0
@@ -154,7 +154,7 @@ class SetupData():
 
         if noun + verb + adj > 1:
             s = ' '.join(tok.text for tok in tokenized_review)
-            return self.s
+            return s
         else:
             return -1
 

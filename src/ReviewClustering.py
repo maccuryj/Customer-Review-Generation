@@ -111,7 +111,7 @@ class ReviewKMeans():
         if not os.path.exists(resource_folder):
             os.mkdir(resource_folder)
 
-    def _get_embeddingloader(self, batch_size):
+    def get_embeddingloader(self, batch_size):
         """
         Returns a DataLoader for review embeddings
 
@@ -132,7 +132,8 @@ class ReviewKMeans():
             filename (str):                 name of file containing the model
         """        
         if folder is None:
-            filename = os.path.join(folder, filename)
+            folder = self.resource_folder
+        filename = os.path.join(folder, filename)
         self.model = load(filename)
         return self.model
 
@@ -145,11 +146,12 @@ class ReviewKMeans():
             filename (str):                 name of file containing the cluster labels
         """        
         if folder is None:
-            filename = os.path.join(folder, filename)
+            folder = self.resource_folder
+        filename = os.path.join(folder, filename)
         self.cluster_dict = load(filename)
         return self.cluster_dict
 
-    def _compute_clusters(self, loader, clustering, save_labels=False):
+    def compute_clusters(self, loader, clustering, save_labels=False, filename="ClusterDict.joblib"):
         """
         Computes the cluster labels given a KMeans model and stores them on disk
 
@@ -174,7 +176,7 @@ class ReviewKMeans():
                 i = i + 1
 
         if save_labels:
-            dump(self.cluster_dict, os.path.join(self.resource_folder, "ClusterDict.joblib"))
+            dump(self.cluster_dict, os.path.join(self.resource_folder, filename))
 
         return self.cluster_dict      
 
