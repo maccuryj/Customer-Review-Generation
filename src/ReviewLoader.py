@@ -48,12 +48,12 @@ class ProductReviews():
             words = vectorizer.fit_transform(f)
             self.word2id = vectorizer.vocabulary_
         
-        self.adjust_encoding()
-        self.create_decoding()   
+        self.adjust_encoding()          
         
         if load_clusters:
             cluster_labels = self.load_cluster_labels(self.resource_dir, cluster_label_filename)   
             self._cluster_encodings(cluster_labels)     
+        self.create_decoding()
 
         return vectorizer, words
 
