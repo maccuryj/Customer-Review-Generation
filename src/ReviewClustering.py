@@ -105,6 +105,7 @@ class ReviewKMeans():
         Assignment of class attributes and creation of resource folder to store model 
         and dictionary, in case it does not yet exist
         """
+        #Make files argument optional
         self.files = files
         self.data_folder = data_folder
         self.resource_folder = resource_folder
@@ -168,6 +169,7 @@ class ReviewKMeans():
         for files, batch in loader:
             preds = clustering.predict(batch)
             for j in range(len(files)):
+                print(i)
                 #Reset index when changing file
                 if files[j] != curr_file:
                     curr_file = files[j]

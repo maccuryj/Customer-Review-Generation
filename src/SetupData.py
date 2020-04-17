@@ -35,6 +35,7 @@ class SetupData():
         Args:
             create_dir (bool):              Set True to create directory on first run
         """
+        # Make arguments conditional
         self.data_folder = data_folder
         self.datasets = datasets
         self.n_train_reviews = n_train_reviews
