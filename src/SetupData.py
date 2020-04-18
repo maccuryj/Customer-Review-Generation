@@ -28,7 +28,7 @@ class SetupData():
         n_test_reviews (int):               Number of test reviews per product dataset
     """
 
-    def __init__(self, folder=None, datasets=None, n_train_reviews=0, n_test_reviews=0, create_dir=True):
+    def __init__(self, folder=None, datasets=None, n_train_reviews=0, n_test_reviews=0, create_dir=False):
         """
         Assignment of class attributes and creation of review folder in case it does not yet exist
 
