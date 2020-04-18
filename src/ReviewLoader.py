@@ -194,7 +194,7 @@ class ReviewDataset(IterableDataset):
         self.ds_type = ds_type
 
     def parse_file(self, file):   
-        if ds_type is 'emb':
+        if self.ds_type is 'emb':
             embeddings = np.load(os.path.join(self.data_folder, file))
             for emb in embeddings:
                 yield file, emb
@@ -202,10 +202,10 @@ class ReviewDataset(IterableDataset):
         else:
             with open(os.path.join(self.folder, file), 'r') as review_file:
                 reader = csv.reader(review_file)
-                if ds_type is 'rev':
+                if self.ds_type is 'rev':
                     for i, line in enumerate(reader):                           
                         yield line[0]
-                if ds_type is 'train':
+                if self.ds_type is 'train':
                     for i, line in enumerate(reader):                           
                         yield i, file, line[0]
                 else:
