@@ -262,8 +262,8 @@ class SetupData():
 
         return model
 
-    def get_reviewloader(self, folder, files, batch_size):        
-        dataset = ReviewDataset(folder, files + '.csv', 'rev')
+    def get_reviewloader(self, folder, file, batch_size):        
+        dataset = ReviewDataset(folder, [file + '.csv'], 'rev')
         loader = DataLoader(dataset, batch_size=batch_size)
 
         return loader
