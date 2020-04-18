@@ -223,7 +223,7 @@ class SetupData():
             self._reviews_json2csv(dataset)            
 
 
-    def reviews2BERT(self, loader, n_reviews, batch_size, model, filename, save_embeddings=False):
+    def reviews2BERT(self, loader, n_reviews, batch_size, model, filename=None, save_embeddings=False):
         """
         Store BERT Embeddings built from the reviews taken from the .csv files
         These embeddings are used for clustering purposes
@@ -250,7 +250,7 @@ class SetupData():
             for j, enc in enumerate(encoding):
                 embeddings[batch_size*i+j] = enc
 
-        if save_embeddings:
+        if save_embeddings and filename is not None:
             self._save_reviews(embeddings, filename, 'npy')
 
         return embeddings
