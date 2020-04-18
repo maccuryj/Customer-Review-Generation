@@ -186,7 +186,7 @@ class ReviewDataset(IterableDataset):
     """
 
     def __init__(self, folder, files, ds_type='rev'):
-        if ds_type not in ['rev', 'emb', 'gen']:
+        if ds_type not in ['rev', 'emb', 'train', 'gen']:
             raise ValueError("Argument 'ds_type' was not recognized")     
 
         self.folder = folder
@@ -203,6 +203,9 @@ class ReviewDataset(IterableDataset):
             with open(os.path.join(self.folder, file), 'r') as review_file:
                 reader = csv.reader(review_file)
                 if ds_type is 'rev':
+                    for i, line in enumerate(reader):                           
+                        yield line[0]
+                if ds_type is 'train':
                     for i, line in enumerate(reader):                           
                         yield i, file, line[0]
                 else:
