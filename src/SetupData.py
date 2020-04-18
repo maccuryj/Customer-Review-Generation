@@ -263,7 +263,7 @@ class SetupData():
         return model
 
     def get_reviewloader(self, folder, file, batch_size):        
-        dataset = ReviewDataset(folder, [file + '.csv'], 'rev')
+        dataset = ReviewDataset(folder, [file], 'rev')
         loader = DataLoader(dataset, batch_size=batch_size)
 
         return loader
@@ -279,12 +279,12 @@ class SetupData():
 
         train_datasets = [filename + '_train' for filename in self.datasets]
         for train_set in train_datasets: 
-            loader = get_review_loader(self.folder, [train_set], batch_size)                                   
+            loader = get_review_loader(self.folder, train_set + '.csv', batch_size)                                   
             self._reviews2BERT(loader, self.n_train_reviews, batch_size, model, train_set, True)
 
         test_datasets = [filename + '_test' for filename in self.datasets]
         for test_set in test_datasets:
-            loader = get_review_loader(self.folder, [test_set], batch_size) 
+            loader = get_review_loader(self.folder, test_set + '.csv', batch_size) 
             self._reviews2BERT(loader, self.n_test_reviews, batch_size, model, test_set, True)
 
 
