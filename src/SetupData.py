@@ -28,7 +28,7 @@ class SetupData():
         n_test_reviews (int):               Number of test reviews per product dataset
     """
 
-    def __init__(self, data_folder, datasets, n_train_reviews, n_test_reviews, create_dir=True):
+    def __init__(self, folder=None, datasets=None, n_train_reviews=0, n_test_reviews=0, create_dir=True):
         """
         Assignment of class attributes and creation of review folder in case it does not yet exist
 
@@ -36,7 +36,7 @@ class SetupData():
             create_dir (bool):              Set True to create directory on first run
         """
         # Make arguments conditional
-        self.data_folder = data_folder
+        self.folder = folder
         self.datasets = datasets
         self.n_train_reviews = n_train_reviews
         self.n_test_reviews = n_test_reviews
@@ -223,7 +223,7 @@ class SetupData():
             self._reviews_json2csv(dataset)            
 
 
-    def _reviews2BERT(self, dataset, n_reviews, batch_size, model):
+    def _reviews2BERT(self, loader, n_reviews, batch_size, model, filename, save_embeddings=False):
         """
         Store BERT Embeddings built from the reviews taken from the .csv files
         These embeddings are used for clustering purposes
@@ -238,10 +238,9 @@ class SetupData():
         batch_size = batch_size
 
         print("Processing: ", dataset)
-        embeddings = np.empty((n_reviews, 768,))
-        review_loader = DataLoader(ReviewDataset([os.path.join(self.data_folder, dataset + '.csv')]), batch_size=batch_size)
+        embeddings = np.empty((n_reviews, 768,))        
 
-        for i, rev in enumerate(review_loader):
+        for i, rev in enumerate(loader):
             
             if i % round(n_reviews/10) == 0 and i != 0:
                 print("Processed: " , n_reviews/i, "%")
@@ -251,9 +250,18 @@ class SetupData():
             for j, enc in enumerate(encoding):
                 embeddings[batch_size*i+j] = enc
 
-        self._save_reviews(embeddings, dataset, 'npy')
+        if save_embeddings:
+            self._save_reviews(embeddings, filename, 'npy')
 
-        return
+        return embeddings
+
+    def get_BERT(self):
+        model = SentenceTransformer('bert-base-nli-mean-tokens')
+        use_cuda = torch.cuda.is_available()
+        device = torch.device("cuda:0" if use_cuda else "cpu")
+        model.to(device)
+
+        return model
 
     def create_embedding_files(self, batch_size):
         """
@@ -262,18 +270,17 @@ class SetupData():
         Args:
             batch_size (int):                   Size of batches to be loaded from the DataLoader
         """
-        model = SentenceTransformer('bert-base-nli-mean-tokens')
-        use_cuda = torch.cuda.is_available()
-        device = torch.device("cuda:0" if use_cuda else "cpu")
-        model.to(device)
+        model = get_BERT()
 
         train_datasets = [filename + '_train' for filename in self.datasets]
-        for train_set in train_datasets:                                    
-            self._reviews2BERT(train_set, self.n_train_reviews, batch_size, model)
+        for train_set in train_datasets: 
+            loader = DataLoader(ReviewDataset([os.path.join(self.folder, dataset + '.csv')]), batch_size=batch_size)                                   
+            self._reviews2BERT(loader, self.n_train_reviews, batch_size, model, dataset, True)
 
         test_datasets = [filename + '_test' for filename in self.datasets]
         for test_set in test_datasets:
-            self._reviews2BERT(test_set, self.n_test_reviews, batch_size, model)
+            loader = DataLoader(ReviewDataset([os.path.join(self.folder, dataset + '.csv')]), batch_size=batch_size)
+            self._reviews2BERT(loader, self.n_test_reviews, batch_size, model, dataset, True)
 
 
 

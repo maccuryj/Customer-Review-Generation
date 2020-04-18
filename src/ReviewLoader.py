@@ -51,11 +51,12 @@ class ProductReviews():
         self.adjust_encoding()          
         
         if load_clusters:
-            cluster_labels = self.load_cluster_labels(self.resource_dir, cluster_label_filename)   
-            self._cluster_encodings(cluster_labels)     
+            cluster_labels = self.load_cluster_labels(self.resource_dir, cluster_label_filename) 
+            k = len(set(cluster_labels.values()))  
+            self._cluster_encodings(k)     
         self.create_decoding()
 
-        return vectorizer, words
+        return self.word2id
 
     def adjust_encoding(self):
         """
@@ -69,20 +70,21 @@ class ProductReviews():
 
         encoding_size = len(self.word2id)
 
-        tokens = ["<UNK>", "<SOR>", "<EOR>"]
+        tokens = ["<UNK>", "<EOR>"]
         i = 0
         for tok in tokens:
             if tok not in self.word2id.keys():
                 self.word2id[tok] = encoding_size + i
                 i += 1
 
-    def _cluster_encodings(self, cluster_labels):
+    def _cluster_encodings(self, k):
         """
         Add the cluster start tokens to the word encoding
 
-
+        Args:
+            k (int):                Number of clusters            
         """
-        k = len(set(cluster_labels.values()))
+        
         encoding_size = len(self.word2id)           
 
         for i in range(k):
@@ -97,7 +99,7 @@ class ProductReviews():
         for word in self.word2id:
             self.id2word[self.word2id[word]] = word
 
-    def get_reviewloader(self, batch_size, files, cluster_labels, embedding_method='nnEmbedding', embedding_dim=256):
+    def get_reviewloader(self, batch_size=2048, folder=None, files=None, cluster_labels=None, embedding_method='nnEmbedding', embedding_dim=256):
         """
         Creates PyTorch Dataloader for reviews
 
@@ -106,7 +108,9 @@ class ProductReviews():
             files (str []:)                 Files to be processed by the DataLoader
             embedding_method (str):         Input Embedding (one-hot or nn.Embedding)
         """
-        dataset = ReviewDataset(self.review_dir, files)
+        if folder is None:
+            folder = self.review_dir
+        dataset = ReviewDataset(folder, files, 'rev')
 
         if embedding_method not in ['nnEmbedding', 'onehot']:
             raise ValueError("Invalid embedding_method argument")
@@ -166,20 +170,44 @@ class ProductReviews():
         return cluster_labels
 
 
-
 # Check if need to accomodate for num_workers > 0,
 # as currently only supports single process.
 class ReviewDataset(IterableDataset):
+    """
+    This class extends the PyTorch IterableDataset class,
+    representing a datastream of reviews from the provided files.
+    Depending on the use case, it yields different types of data
+    that is retrieved in batches by the PyTorch DataLoader.
 
-    def __init__(self, data_folder, files):
+    Attributes:
+        folder (str):                   folder to retrieve data from
+        files (str []):                 files to retrieve data from
+        ds_type (str):                  dataset type (simple reviews, review embeddings or generated reviews)
+    """
+
+    def __init__(self, folder, files, ds_type='rev'):
+        if ds_type not in ['rev', 'emb', 'gen']:
+            raise ValueError("Argument 'ds_type' was not recognized")     
+
+        self.folder = folder
         self.files = files
-        self.data_folder = data_folder
+        self.ds_type = ds_type
 
-    def parse_file(self, file):        
-        with open(os.path.join(self.data_folder, file), 'r') as review_file:
-            reader = csv.reader(review_file)
-            for i, line in enumerate(reader):                           
-                yield i, file, line[0]
+    def parse_file(self, file):   
+        if ds_type is 'emb':
+            embeddings = np.load(os.path.join(self.data_folder, file))
+            for emb in embeddings:
+                yield file, emb
+        
+        else:
+            with open(os.path.join(self.folder, file), 'r') as review_file:
+                reader = csv.reader(review_file)
+                if ds_type is 'rev':
+                    for i, line in enumerate(reader):                           
+                        yield i, file, line[0]
+                else:
+                    for line in reader:                           
+                        yield line
 
     def get_stream(self):        
         return chain.from_iterable(map(self.parse_file, self.files))
@@ -207,7 +235,7 @@ class Embedder:
         
         if method == "onehot":
             if dict_size != embedding_dim:
-                raise Exception("If using one-hot, dict_size must equal embed_dim!")
+                raise ValueError("If using one-hot, dict_size must equal embed_dim!")
         
         if method == "nnEmbedding":
             self.embedding = nn.Embedding(dict_size, embedding_dim)

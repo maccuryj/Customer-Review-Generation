@@ -100,7 +100,7 @@ class ReviewKMeans():
         cluster_dict (dict):                dictionary of cluster labels
     """
 
-    def __init__(self, data_folder, resource_folder, files):
+    def __init__(self, data_folder=None, resource_folder=None, files=None):
         """
         Assignment of class attributes and creation of resource folder to store model 
         and dictionary, in case it does not yet exist
@@ -109,17 +109,25 @@ class ReviewKMeans():
         self.files = files
         self.data_folder = data_folder
         self.resource_folder = resource_folder
-        if not os.path.exists(resource_folder):
+        if resource_folder is not None and not os.path.exists(resource_folder):
             os.mkdir(resource_folder)
 
-    def get_embeddingloader(self, batch_size):
+    def get_embedding_file_loader(self, batch_size, folder=None, files=None):
         """
-        Returns a DataLoader for review embeddings
+        Returns a DataLoader for review embeddings, on the basis of
+        a set of files.
 
         Args:
             batch_size (int):               batch size for embedding DataLoader
+            folder (str):                   name of folder that holds files
+            files (str []):                 list of embedding filenames
         """
-        dataset = ReviewEmbeddingDataset(self.data_folder, self.files)
+        if folder is None and self.data_folder is not None:
+            folder = self.data_folder
+        if files is None and self.files is not None:
+            files = self.files
+            
+        dataset = ReviewDataset(folder, files, 'emb')
         self.loader = DataLoader(dataset, batch_size=batch_size)
 
         return self.loader
@@ -160,9 +168,9 @@ class ReviewKMeans():
             loader (DataLoader):            DataLoader for review embeddings
             clustering (model):             KMeans model
             save_labels (bool):             Decides whether cluster labels should be saved
-
+            filename (str):                 Name of cluster dictionary file to be stored
         """
-        self.cluster_dict = {}
+        cluster_dict = {}
 
         i = 1
         curr_file = ""
@@ -174,13 +182,13 @@ class ReviewKMeans():
                 if files[j] != curr_file:
                     curr_file = files[j]
                     i = 1             
-                self.cluster_dict[files[j] + ' - ' + str(i)] = preds[j]
+                cluster_dict[files[j] + ' - ' + str(i)] = preds[j]
                 i = i + 1
 
         if save_labels:
-            dump(self.cluster_dict, os.path.join(self.resource_folder, filename))
+            dump(cluster_dict, os.path.join(self.resource_folder, filename))
 
-        return self.cluster_dict      
+        return cluster_dict      
 
 
     def MB_Spherical_KMeans(self, k, batch_size=2048, save_model=True, save_labels=True):
@@ -193,7 +201,7 @@ class ReviewKMeans():
             save_model (bool):              Decides whether model should be saved
             save_labels (bool):             Decides whether cluster labels should be saved
         """
-        loader = self._get_embeddingloader(batch_size)        
+        loader = self._get_embedding_file_loader(batch_size)        
         clustering = MiniBatchKMeans(n_clusters=k, batch_size=batch_size)
 
         for f, batch in loader:
@@ -235,7 +243,6 @@ class ReviewKMeans():
                 clustering.partial_fit(batch)
 
             ssq.append(clustering.inertia_)
-
 
         sns.lineplot(np.arange(min_k,max_k,step), ssq).set_title("KMeans Inertia Elbow Plot")
 
