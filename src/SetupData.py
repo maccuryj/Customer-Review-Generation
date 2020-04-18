@@ -263,6 +263,12 @@ class SetupData():
 
         return model
 
+    def get_review_loader(self, folder, files, batch_size):        
+        dataset = ReviewDataset(os.path.join(folder, files + '.csv'))
+        loader = DataLoader(dataset, batch_size=batch_size)
+
+        return loader
+
     def create_embedding_files(self, batch_size):
         """
         Runs the BERT embedding file creation processes on the set of supplied datasets
@@ -274,12 +280,12 @@ class SetupData():
 
         train_datasets = [filename + '_train' for filename in self.datasets]
         for train_set in train_datasets: 
-            loader = DataLoader(ReviewDataset([os.path.join(self.folder, dataset + '.csv')]), batch_size=batch_size)                                   
+            loader = get_review_loader(self.folder, [train_set], batch_size)                                   
             self._reviews2BERT(loader, self.n_train_reviews, batch_size, model, dataset, True)
 
         test_datasets = [filename + '_test' for filename in self.datasets]
         for test_set in test_datasets:
-            loader = DataLoader(ReviewDataset([os.path.join(self.folder, dataset + '.csv')]), batch_size=batch_size)
+            loader = get_review_loader(self.folder, [test_set], batch_size) 
             self._reviews2BERT(loader, self.n_test_reviews, batch_size, model, dataset, True)
 
 
