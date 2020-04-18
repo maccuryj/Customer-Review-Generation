@@ -41,8 +41,8 @@ class SetupData():
         self.n_train_reviews = n_train_reviews
         self.n_test_reviews = n_test_reviews
 
-        if create_dir is True and not os.path.exists(data_folder):
-            os.mkdir(data_folder)
+        if create_dir is True and not os.path.exists(folder):
+            os.mkdir(folder)
 
     def _clean_review_syntactic(self, s):
         """
@@ -223,7 +223,7 @@ class SetupData():
             self._reviews_json2csv(dataset)            
 
 
-    def _reviews2BERT(self, loader, n_reviews, batch_size, model, filename, save_embeddings=False):
+    def reviews2BERT(self, loader, n_reviews, batch_size, model, filename, save_embeddings=False):
         """
         Store BERT Embeddings built from the reviews taken from the .csv files
         These embeddings are used for clustering purposes
