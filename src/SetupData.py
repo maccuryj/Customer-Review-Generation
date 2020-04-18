@@ -235,9 +235,8 @@ class SetupData():
             batch_size (int):                   Size of batches loaded from the DataLoader
             model (sentence_transformer):       BERT Embedding encoder model
         """
-        batch_size = batch_size
-
-        print("Processing: ", dataset)
+        if filename is not None:
+            print("Processing: ", filename)
         embeddings = np.empty((n_reviews, 768,))        
 
         for i, rev in enumerate(loader):
@@ -281,12 +280,12 @@ class SetupData():
         train_datasets = [filename + '_train' for filename in self.datasets]
         for train_set in train_datasets: 
             loader = get_review_loader(self.folder, [train_set], batch_size)                                   
-            self._reviews2BERT(loader, self.n_train_reviews, batch_size, model, dataset, True)
+            self._reviews2BERT(loader, self.n_train_reviews, batch_size, model, train_set, True)
 
         test_datasets = [filename + '_test' for filename in self.datasets]
         for test_set in test_datasets:
             loader = get_review_loader(self.folder, [test_set], batch_size) 
-            self._reviews2BERT(loader, self.n_test_reviews, batch_size, model, dataset, True)
+            self._reviews2BERT(loader, self.n_test_reviews, batch_size, model, test_set, True)
 
 
 
