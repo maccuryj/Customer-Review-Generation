@@ -17,6 +17,16 @@ class ClusterEvaluation():
         Take the generated reviews and split them in a list of clusters and
         token-free reviews that can be clustered.
         """
+        clusters = []
+        reviews = []
+        for rev in gen_reviews:
+            label_delimiter = rev.find('>')
+            clusters.append(rev[5:delimiter])
+            if rev[-1]=='>':
+                reviews.append(rev[label_delimiter+2:-6])
+            else:
+                reviews.append(rev[label_delimiter+2:])
+
         clusters = [rev[5] for rev in gen_reviews]
         # Condition on whether there is <EOR> token
         reviews = [rev[8:-6] if rev[-1]=='>' else rev[8:] for rev in gen_reviews]
