@@ -30,7 +30,7 @@ class ClusterEvaluation():
         return clusters, reviews    
 
     def predict_gen(self, gen_reviews, embedding_model, clustering):
-        embedding_model.encode(gen_reviews)
+        embeddings = embedding_model.encode(gen_reviews)
         preds = clustering.predict(embeddings)
 
         return preds
