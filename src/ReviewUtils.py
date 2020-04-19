@@ -9,8 +9,6 @@ class ReviewUtils():
         self.data_folder = data_folder
         self.resource_folder = resource_folder
 
-    def get_reviewloader():
-        pass
 
     def get_BERT(self):
         model = SentenceTransformer('bert-base-nli-mean-tokens')
@@ -20,6 +18,12 @@ class ReviewUtils():
 
         return model
     
+    def save_to_disk(self, folder, filename, obj):
+        if '.' not in filename:
+            filename = filename + '.joblib'
+
+        dump(obj, os.path.join(folder, filename))
+
     def load_from_disk(self, folder, filename):
         """
         Load a model from disk.
