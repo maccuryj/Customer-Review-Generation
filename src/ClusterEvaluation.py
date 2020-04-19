@@ -27,10 +27,6 @@ class ClusterEvaluation():
             else:
                 reviews.append(rev[label_delimiter+2:])
 
-        clusters = [rev[5] for rev in gen_reviews]
-        # Condition on whether there is <EOR> token
-        reviews = [rev[8:-6] if rev[-1]=='>' else rev[8:] for rev in gen_reviews]
-
         return clusters, reviews    
 
     def predict_gen(self, embedding_model, clustering):
