@@ -21,7 +21,7 @@ class ClusterEvaluation():
         reviews = []
         for rev in gen_reviews:
             label_delimiter = rev.find('>')
-            clusters.append(rev[5:delimiter])
+            clusters.append(rev[5:label_delimiter])
             if rev[-1]=='>':
                 reviews.append(rev[label_delimiter+2:-6])
             else:
