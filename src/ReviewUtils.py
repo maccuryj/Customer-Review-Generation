@@ -1,6 +1,7 @@
 import os
 import torch
 from joblib import dump, load
+from itertools import chain
 from sentence_transformers import SentenceTransformer
 from torch.utils.data import DataLoader, IterableDataset
 
