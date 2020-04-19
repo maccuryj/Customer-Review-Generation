@@ -74,19 +74,18 @@ class ReviewKMeans():
         cluster_dict (dict):                dictionary of cluster labels
     """
 
-    def __init__(self, data_folder=None, resource_folder=None, files=None):
+    def __init__(self, utils, files=None):
         """
         Assignment of class attributes and creation of resource folder to store model 
         and dictionary, in case it does not yet exist
         """
-        #Make files argument optional
+        if not isinstance(utils, ReviewUtils):        
+            raise ValueError("Argument 'utils' should be a ReviewUtils object!")
+        self.utils = utils
         self.files = files
-        self.data_folder = data_folder
-        self.resource_folder = resource_folder
-        if resource_folder is not None and not os.path.exists(resource_folder):
-            os.mkdir(resource_folder)
 
-    def get_embedding_file_loader(self, batch_size, folder=None, files=None):
+    #can be moved to utils
+    def get_loader(self, batch_size):
         """
         Returns a DataLoader for review embeddings, on the basis of
         a set of files.
@@ -96,45 +95,12 @@ class ReviewKMeans():
             folder (str):                   name of folder that holds files
             files (str []):                 list of embedding filenames
         """
-        if folder is None and self.data_folder is not None:
-            folder = self.data_folder
-        if files is None and self.files is not None:
-            files = self.files
-            
         dataset = ReviewDataset(folder, files, 'emb')
         self.loader = DataLoader(dataset, batch_size=batch_size)
 
         return self.loader
 
-    def load_model(self, folder=None, filename='KMeansModel.joblib'):
-        """
-        Load a model from disk.
-
-        Args:
-            folder (str):                   name of folder containing file (generally resource_folder)
-            filename (str):                 name of file containing the model
-        """        
-        if folder is None:
-            folder = self.resource_folder
-        filename = os.path.join(folder, filename)
-        self.model = load(filename)
-        return self.model
-
-    def load_labels(self, folder=None, filename='ClusterDict.joblib'):
-        """
-        Load cluster labels from disk.
-
-        Args:
-            folder (str):                   name of folder containing file (generally resource_folder)
-            filename (str):                 name of file containing the cluster labels
-        """        
-        if folder is None:
-            folder = self.resource_folder
-        filename = os.path.join(folder, filename)
-        self.cluster_dict = load(filename)
-        return self.cluster_dict
-
-    def compute_clusters(self, loader, clustering, save_labels=False, filename="ClusterDict.joblib"):
+    def compute_clusters(self, loader, clustering, save_labels=False, filename='ClusterDict.joblib'):
         """
         Computes the cluster labels given a KMeans model and stores them on disk
 
@@ -160,12 +126,12 @@ class ReviewKMeans():
                 i = i + 1
 
         if save_labels:
-            dump(cluster_dict, os.path.join(self.resource_folder, filename))
+            self.utils.save_to_disk(self.utils.resource_folder, filename, cluster_dict)            
 
         return cluster_dict      
 
-
-    def MB_Spherical_KMeans(self, k, batch_size=2048, save_model=True, save_labels=True):
+    #TODO: loader has to be passed or separate to have a computation function
+    def MB_Spherical_KMeans(self, k, batch_size=2048, save_model=True, save_labels=True, fn_model='KMeansModel.joblib', fn_labels='ClusterDict.joblib'):
         """
         MiniBatchKMeans model, clustering the normalized BERT Embeddings.
         
@@ -175,22 +141,21 @@ class ReviewKMeans():
             save_model (bool):              Decides whether model should be saved
             save_labels (bool):             Decides whether cluster labels should be saved
         """
-        loader = self._get_embedding_file_loader(batch_size)        
+        loader = self.get_loader(batch_size)        
         clustering = MiniBatchKMeans(n_clusters=k, batch_size=batch_size)
 
         for f, batch in loader:
             normalize(batch)
             clustering.partial_fit(batch)
-
-        self.model = clustering
+        
         if save_model:
-            dump(clustering, os.path.join(self.resource_folder, "KMeansModel.joblib"))
+            self.utils.save_to_disk(self.utils.resource_folder, fn_model, clustering)
 
-        cluster_dict = self._compute_clusters(loader, clustering, save_labels)
+        cluster_dict = self._compute_clusters(loader, clustering, save_labels, fn_labels)
 
-        return self.model, cluster_dict
+        return clustering, cluster_dict
 
-
+    #TODO: Loader has to be passed
     def elbow_plot(self, min_k=20, max_k=300, step=20, notification_step=100, batch_size=2048):
         """
         Creates an elbow plot for the KMeans clustering
@@ -206,7 +171,7 @@ class ReviewKMeans():
         """
         ssq = []
         n_steps = (max_k-min_k)/step
-        loader = self._get_embeddingloader(batch_size) 
+        loader = self.get_loader(batch_size) 
 
         for k in range(min_k, max_k, step):
             if k % notification_step == 0:
@@ -221,7 +186,7 @@ class ReviewKMeans():
         sns.lineplot(np.arange(min_k,max_k,step), ssq).set_title("KMeans Inertia Elbow Plot")
 
     def test_indices(self, file, i):
-        embeddings = np.load(os.path.join(self.data_folder, file))
+        embeddings = np.load(os.path.join(self.utils.data_folder, file))
         emb = embeddings[:i]
         del(embeddings)
         preds = self.model.predict(emb)
