@@ -29,7 +29,7 @@ class ClusterEvaluation():
 
         return clusters, reviews    
 
-    def predict_gen(self, embedding_model, clustering):
+    def predict_gen(self, gen_reviews, embedding_model, clustering):
         embedding_model.encode(gen_reviews)
         preds = clustering.predict(embeddings)
 
@@ -50,7 +50,7 @@ class ClusterEvaluation():
         Separate computation class, in case different models should be used
         """
         result = []
-        preds = self.predict_gen(embedding_model, clustering)
+        preds = self.predict_gen(gen_reviews, embedding_model, clustering)
 
         acc = accuracy_score(np.array(clusters), np.array(preds))
         conf = confusion_matrix(np.array(clusters), np.array(preds))
