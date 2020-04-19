@@ -22,7 +22,7 @@ class ReviewClustering():
     """
 
     def __init__(self, utils):
-         if not isinstance(utils, ReviewUtils):        
+        if not isinstance(utils, ReviewUtils):        
             raise ValueError("Argument 'utils' should be a ReviewUtils object!")
         self.utils = utils
 
