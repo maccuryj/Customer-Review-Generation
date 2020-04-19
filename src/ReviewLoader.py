@@ -50,7 +50,7 @@ class ProductReviews():
         self.adjust_encoding()          
         
         if load_clusters:
-            cluster_labels = self.load_cluster_labels(self.utils.resource_folder, cluster_label_filename) 
+            cluster_labels = self.load_cluster_labels(cluster_label_filename) 
             k = len(set(cluster_labels.values()))  
             self._cluster_encodings(k)     
         self.create_decoding()
