@@ -10,6 +10,7 @@ from torch.nn.utils.rnn import pad_sequence, pack_padded_sequence
 from torch.nn.functional import one_hot
 from torch.utils.data import DataLoader, IterableDataset
 from sklearn.feature_extraction.text import TfidfVectorizer
+
 from ReviewUtils import ReviewUtils, ReviewDataset
 
 class ProductReviews():
