@@ -70,7 +70,7 @@ class ProductReviews():
         encoding_size = len(self.word2id)
 
         tokens = ["<UNK>", "<EOR>"]
-        i = 1
+        i = 0
         for tok in tokens:
             if tok not in self.word2id.keys():
                 self.word2id[tok] = encoding_size + i
