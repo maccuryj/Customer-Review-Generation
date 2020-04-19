@@ -16,34 +16,39 @@ class ReviewClustering():
     """
     Class created mostly to test clustering with a subset of the data.
     Provides helper function for retrieval and sampling of review data.
+
+    Args:
+        utils (ReviewUtils):                Utility object that holds information and helper classes
     """
 
-    def __init__(review_dir):
-         self.review_dir = review_dir 
+    def __init__(self, utils):
+         if not isinstance(utils, ReviewUtils):        
+            raise ValueError("Argument 'utils' should be a ReviewUtils object!")
+        self.utils = utils
 
-    def get_reviews(datasets=None):
+    def get_reviews(self, datasets=None):
         reviews = []
-        review_files = [file for file in os.listdir(self.review_dir) if '.csv' in file]
+        review_files = [file for file in os.listdir(self.utils.data_folder) if '.csv' in file]
         for file in review_files:
-            with open(os.path.join(self.review_dir, file), newline='') as f:
+            with open(os.path.join(self.utils.data_folder, file), newline='') as f:
                 reader = csv.reader(f)
                 for i, row in enumerate(reader):
                     reviews.append(row[1])
 
         return reviews       
 
-    def get_embeddings(n_files, n_reviews, review_vector_files=None):        
+    def get_embeddings(self, n_files, n_reviews, review_vector_files=None):        
         embeddings = np.empty((n_files, n_reviews, 768))
         if review_vector_files is None:
-            review_vector_files = [file for file in os.listdir(self.review_dir) if '.npy' in file]        
+            review_vector_files = [file for file in os.listdir(self.utils.data_folder) if '.npy' in file]        
         
         for i, file in enumerate(review_vector_files):
-            embeddings[i] = np.load(os.path.join(self.review_dir, file))
+            embeddings[i] = np.load(os.path.join(self.utils.data_folder, file))
 
         self.embeddings = embeddings 
         return embeddings    
 
-    def sample_reviews(ratio=0.1):
+    def sample_reviews(self, ratio=0.1):
         sample = []
         indices = []
         for i, product in enumerate(self.embeddings):
@@ -53,37 +58,6 @@ class ReviewClustering():
                     sample.append(rev)
 
         return samples
-
-class ReviewEmbeddingDataset(IterableDataset):
-    """
-    Dataset class that serves as basis for the BERT Embedding Dataloader
-    used for clustering purposes.
-    Implemented as IterableDataset in order to iteratively retrieve batches from
-    disk and prevent memory overload.
-    """
-
-    def __init__(self, data_folder, files):
-        self.files = files
-        self.data_folder = data_folder
-
-    def parse_file(self, file):
-        """
-        Reads from the .npy embedding files and yields a file vector
-        together with the embeddings
-        """
-        embeddings = np.load(os.path.join(self.data_folder, file))
-        for i, emb in enumerate(embeddings):
-            yield file, emb
-
-    def get_stream(self):   
-        """
-        Implementation of stream over provided embedding files
-        """     
-        return chain.from_iterable(map(self.parse_file, self.files))
-
-    def __iter__(self):
-        return self.get_stream()
-
 
 class ReviewKMeans():
     """

@@ -19,7 +19,7 @@ class ProductReviews():
     Provides review dataloader for easy integration with PyTorch.
 
     Attributes:
-        root_dir (str):                 absolute path of review directory
+        utils (ReviewUtils):            Utility object that holds information and helper classes
         word2id (dict):                 word to index dictionary
         id2word (dict):                 index to word dictionary        
     """    

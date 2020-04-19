@@ -5,10 +5,15 @@ from sentence_transformers import SentenceTransformer
 
 class ReviewUtils():
 
-    def __init__(self, data_folder, resource_folder):
+    def __init__(self, data_folder, resource_folder, create_dir=True):
         self.data_folder = data_folder
         self.resource_folder = resource_folder
 
+        if create_dir is True:
+            if not os.path.exists(data_folder):
+                os.mkdir(data_folder)
+            if not os.path.exists(resource_folder):
+                os.mkdir(resource_folder)
 
     def get_BERT(self):
         model = SentenceTransformer('bert-base-nli-mean-tokens')

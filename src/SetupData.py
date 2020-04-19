@@ -22,27 +22,19 @@ class SetupData():
     "http://deepyeti.ucsd.edu/jianmo/amazon/categoryFiles/".
 
     Attributes:
-        data_folder (str):                  Path of the folder that holds review data
+        utils (ReviewUtils):                Utility object that holds information and helper classes   
         datasets (str []):                  Array of names of datasets retrieved from the Amazon Review Corpus
         n_train_reviews (int):              Number of training reviews per product dataset
         n_test_reviews (int):               Number of test reviews per product dataset
     """
 
-    def __init__(self, folder=None, datasets=None, n_train_reviews=0, n_test_reviews=0, create_dir=False):
-        """
-        Assignment of class attributes and creation of review folder in case it does not yet exist
-
-        Args:
-            create_dir (bool):              Set True to create directory on first run
-        """
-        # Make arguments conditional
-        self.folder = folder
+    def __init__(self, utils, datasets, n_train_reviews=0, n_test_reviews=0):
+        if not isinstance(utils, ReviewUtils):        
+            raise ValueError("Argument 'utils' should be a ReviewUtils object!")
+        self.utils = utils
         self.datasets = datasets
         self.n_train_reviews = n_train_reviews
         self.n_test_reviews = n_test_reviews
-
-        if create_dir is True and not os.path.exists(folder):
-            os.mkdir(folder)
 
     def _clean_review_syntactic(self, s):
         """
@@ -173,12 +165,12 @@ class SetupData():
         else:
             print("Saving: ", filename)
             if filetype is 'csv':                
-                with open(os.path.join(self.data_folder, filename), 'w') as csvfile:
+                with open(os.path.join(self.utils.data_folder, filename), 'w') as csvfile:
                     writer = csv.writer(csvfile)
                     for i, rev in enumerate(reviews):
                         writer.writerow([rev])
             if filetype is 'npy':
-                filename = os.path.join(self.data_folder, filename)
+                filename = os.path.join(self.utils.data_folder, filename)
                 np.save(filename, reviews)
 
 
@@ -254,20 +246,14 @@ class SetupData():
 
         return embeddings
 
-    def get_BERT(self):
-        model = SentenceTransformer('bert-base-nli-mean-tokens')
-        use_cuda = torch.cuda.is_available()
-        device = torch.device("cuda:0" if use_cuda else "cpu")
-        model.to(device)
-
-        return model
-
+    #TODO: Check where this is Move to utils class and change name in ReviewLoader class
     def get_reviewloader(self, folder, file, batch_size):        
         dataset = ReviewDataset(folder, [file], 'rev')
         loader = DataLoader(dataset, batch_size=batch_size)
 
         return loader
 
+    #Don't forget to change the loader location (utils)
     def create_embedding_files(self, batch_size):
         """
         Runs the BERT embedding file creation processes on the set of supplied datasets
@@ -275,16 +261,16 @@ class SetupData():
         Args:
             batch_size (int):                   Size of batches to be loaded from the DataLoader
         """
-        model = get_BERT()
+        model = self.utils.get_BERT()
 
         train_datasets = [filename + '_train' for filename in self.datasets]
         for train_set in train_datasets: 
-            loader = get_review_loader(self.folder, train_set + '.csv', batch_size)                                   
+            loader = get_review_loader(self.utils.data_folder, train_set + '.csv', batch_size)                                   
             self._reviews2BERT(loader, self.n_train_reviews, batch_size, model, train_set, True)
 
         test_datasets = [filename + '_test' for filename in self.datasets]
         for test_set in test_datasets:
-            loader = get_review_loader(self.folder, test_set + '.csv', batch_size) 
+            loader = get_review_loader(self.utils.data_folder, test_set + '.csv', batch_size) 
             self._reviews2BERT(loader, self.n_test_reviews, batch_size, model, test_set, True)
 
 
@@ -302,16 +288,16 @@ class SetupData():
         """
         
         reviews = []
-        with open(os.path.join(data_folder, dataset + '.csv')) as f:
+        with open(os.path.join(self.utils.data_folder, dataset + '.csv')) as f:
             reader = csv.reader(f)
             for j, row in enumerate(reader):
                 if j < i:
                     reviews.append(row[0])
         
-        embeddings = np.load(os.path.join(data_folder, dataset + '_Embedding.npy'))
+        embeddings = np.load(os.path.join(self.utils.data_folder, dataset + '.npy'))
         emb = embeddings[:i]
 
-        model = SentenceTransformer('bert-base-nli-mean-tokens')
+        model = self.utils.get_BERT()
         encoding = model.encode(reviews)            
 
         # Checks numpy array equality. Due to small variations when saving files and converting,

@@ -1,6 +1,7 @@
 import os
 import torch
 import numpy as np
+import seaborn as sns
 from ReviewUtils import ReviewUtils
 from sklearn.metrics import accuracy_score, confusion_matrix
 
@@ -20,13 +21,16 @@ class ClusterEvaluation():
         # Condition on whether there is <EOR> token
         reviews = [rev[8:-6] if rev[-1]=='>' else rev[8:] for rev in gen_reviews]
 
-        return clusters, reviews
+        return clusters, reviews    
 
     def predict_gen(self, embedding_model, clustering):
         embedding_model.embed(gen_reviews)
         preds = clustering.predict(embeddings)
 
         return preds
+
+    def plot_conf(self, conf):
+        sns.heatmap(conf, annot=True).set_title("Confusion Matrix for conditionally generated reviews")
 
     def eval_clustering(self, gen_reviews, clusters, fn_clustering='KMeansModel.joblib'):
         bert_model = self.utils.get_BERT()
