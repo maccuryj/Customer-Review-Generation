@@ -6,15 +6,14 @@ import csv
 import json
 import gzip
 import torch
+from itertools import chain
 from torch.utils.data import DataLoader
 from sentence_transformers import SentenceTransformer
 import spacy
 nlp = spacy.load('en_core_web_sm')
 
-from ReviewLoader import ReviewDataset
+from ReviewUtils import ReviewDataset
 
-from torch.utils.data import IterableDataset
-from itertools import chain
 
 class SetupData():
     """
