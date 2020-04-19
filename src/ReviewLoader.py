@@ -61,19 +61,19 @@ class ProductReviews():
         """
         Adjust the word encoding to include language tokens
         """
-        if '0' in self.word2id.values():
+        if 0 in self.word2id.values():
             for word in self.word2id:
-                if self.word2id[word] == '0':
+                if self.word2id[word] == 0:
                     self.word2id[word] = len(self.word2id)
-        self.word2id["<PAD>"] = '0'
+        self.word2id["<PAD>"] = 0
 
         encoding_size = len(self.word2id)
 
         tokens = ["<UNK>", "<EOR>"]
-        i = 0
+        i = 1
         for tok in tokens:
             if tok not in self.word2id.keys():
-                self.word2id[tok] = str(encoding_size + i)
+                self.word2id[tok] = encoding_size + i
                 i += 1
 
     def _cluster_encodings(self, k):
@@ -89,7 +89,7 @@ class ProductReviews():
         for i in range(k):
             token = "<SOR " + str(i) + ">"
             if token not in self.word2id.keys():
-                self.word2id[token] = str(encoding_size + i)
+                self.word2id[token] = encoding_size + i
 
     def create_decoding(self):
         """
