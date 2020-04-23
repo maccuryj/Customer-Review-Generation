@@ -1,4 +1,5 @@
 import os
+import csv
 import torch
 import numpy as np
 import seaborn as sns
@@ -11,6 +12,63 @@ class ClusterEvaluation():
         if not isinstance(utils, ReviewUtils):        
             raise ValueError("Argument 'utils' should be a ReviewUtils object!")
         self.utils = utils
+
+    def cluster_samples(cluster_dict, sample_size=10, clusters=None):
+        sample_files = []
+        indices = []
+        cluster_samples = {}
+
+        if clusters is None:
+            clusters = set(cluster_dict.values())
+
+        for c in clusters:
+            cluster_samples[c] = []
+        
+        i = 1
+        for f in range(5):            
+            for k in list(cluster_dict.keys())[f:(f+1)*100000]
+                if i % ((sample_size*len(clusters))/5)+1:
+                    i += 1
+                    break
+            if cluster_dict[k] in clusters:
+                if len(cluster_samples[cluster_dict[k]]) < sample size:
+                    #cluster_samples[cluster_dict[k]].append(k)
+                    sample_files.append(k[:c])
+                    indices.append(k[c+7:])
+                    v_clusters.append(cluster_dict[k])
+                    i += 1
+
+        j = 0
+        for fn in set(sample_files):            
+            with open(fn, 'r') as f:
+                reader = csv.reader(f)
+            
+            for i, row in enumerate(reader):
+                if sample_files[j] != fn:
+                    break
+                if i == indices[j]:
+                    cluster_samples[v_clusters[j]].append(row)
+
+        return cluster_samples
+
+        
+
+        """                        
+        for j, k in enumerate(cluster_dict.keys()):
+            if i % ((sample_size*len(clusters))/5):
+
+            if cluster_dict[k] in clusters:
+                if cluster_dict[k] not in cluster_samples.keys():
+                    cluster_samples[cluster_dict[k]] = [k]
+                else:
+                    if len(cluster_samples[cluster_dict[k]]) < sample size:
+                        cluster_samples[cluster_dict[k]].append(k)
+                        i += 1
+        """
+        
+        
+
+
 
     def process_gen_reviews(self, gen_reviews):
         """
