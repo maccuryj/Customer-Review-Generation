@@ -13,7 +13,7 @@ class ClusterEvaluation():
             raise ValueError("Argument 'utils' should be a ReviewUtils object!")
         self.utils = utils
 
-    def cluster_samples(cluster_dict, sample_size=10, clusters=None):
+    def cluster_samples(self, cluster_dict, sample_size=10, clusters=None):
         sample_files = []
         indices = []
         cluster_samples = {}
