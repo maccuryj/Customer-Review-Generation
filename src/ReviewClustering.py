@@ -49,7 +49,7 @@ class ReviewKMeans():
             folder (str):                   name of folder that holds files
             files (str []):                 list of embedding filenames
         """
-        dataset = ReviewDataset(folder, files, 'emb')
+        dataset = ReviewDataset(self.utils.folder, self.utils.files, 'emb')
         self.loader = DataLoader(dataset, batch_size=batch_size)
 
         return self.loader
