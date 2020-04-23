@@ -10,54 +10,8 @@ from matplotlib import pyplot as plt
 import seaborn as sns
 sns.set(rc={'figure.figsize':(11.7,8.27)})
 
+from ReviewUtils import ReviewUtils
 from ReviewLoader import ReviewDataset
-
-class ReviewClustering():
-    """
-    Class created mostly to test clustering with a subset of the data.
-    Provides helper function for retrieval and sampling of review data.
-
-    Args:
-        utils (ReviewUtils):                Utility object that holds information and helper classes
-    """
-
-    def __init__(self, utils):
-        if not isinstance(utils, ReviewUtils):        
-            raise ValueError("Argument 'utils' should be a ReviewUtils object!")
-        self.utils = utils
-
-    def get_reviews(self, datasets=None):
-        reviews = []
-        review_files = [file for file in os.listdir(self.utils.data_folder) if '.csv' in file]
-        for file in review_files:
-            with open(os.path.join(self.utils.data_folder, file), newline='') as f:
-                reader = csv.reader(f)
-                for i, row in enumerate(reader):
-                    reviews.append(row[1])
-
-        return reviews       
-
-    def get_embeddings(self, n_files, n_reviews, review_vector_files=None):        
-        embeddings = np.empty((n_files, n_reviews, 768))
-        if review_vector_files is None:
-            review_vector_files = [file for file in os.listdir(self.utils.data_folder) if '.npy' in file]        
-        
-        for i, file in enumerate(review_vector_files):
-            embeddings[i] = np.load(os.path.join(self.utils.data_folder, file))
-
-        self.embeddings = embeddings 
-        return embeddings    
-
-    def sample_reviews(self, ratio=0.1):
-        sample = []
-        indices = []
-        for i, product in enumerate(self.embeddings):
-            for j, rev in enumerate(product):
-                if np.random.sample() < ratio:
-                    indices.append(i*self.embeddings.shape[1] + j)
-                    sample.append(rev)
-
-        return samples
 
 class ReviewKMeans():
     """

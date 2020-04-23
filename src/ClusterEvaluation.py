@@ -26,7 +26,7 @@ class ClusterEvaluation():
         
         i = 1
         for f in range(5):            
-            for k in list(cluster_dict.keys())[f:(f+1)*100000]
+            for k in list(cluster_dict.keys())[f:(f+1)*100000]:
                 if i % ((sample_size*len(clusters))/5)+1:
                     i += 1
                     break
