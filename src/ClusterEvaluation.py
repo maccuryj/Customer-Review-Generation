@@ -16,6 +16,7 @@ class ClusterEvaluation():
     def cluster_samples(self, cluster_dict, sample_size=10, clusters=None):
         sample_files = []
         indices = []
+        v_clusters = []
         cluster_samples = {}
 
         if clusters is None:
