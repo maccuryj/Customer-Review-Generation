@@ -31,7 +31,7 @@ class ClusterEvaluation():
                     i += 1
                     break
             if cluster_dict[k] in clusters:
-                if len(cluster_samples[cluster_dict[k]]) < sample size:
+                if len(cluster_samples[cluster_dict[k]]) < sample_size:
                     #cluster_samples[cluster_dict[k]].append(k)
                     sample_files.append(k[:c])
                     indices.append(k[c+7:])
