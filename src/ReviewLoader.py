@@ -40,9 +40,9 @@ class ProductReviews():
         """
         
         if tfidf:
-            vectorizer = TfidfVectorizer(max_features=max_features,  token_pattern=r"(?u)\b\w+\b")
+            vectorizer = TfidfVectorizer(max_features=max_features,  token_pattern=r"(?u)(\w+|\.)")
         else:
-            vectorizer = TfidfVectorizer(input='filename', max_features=max_features, use_idf=False,  token_pattern=r"(?u)\b\w+\b")
+            vectorizer = TfidfVectorizer(input='filename', max_features=max_features, use_idf=False,  token_pattern=r"(?u)(\w+|\.)")
 
             f = [os.path.join(self.utils.data_folder, file) for file in files]
             words = vectorizer.fit_transform(f)
