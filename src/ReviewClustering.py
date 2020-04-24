@@ -39,7 +39,7 @@ class ReviewKMeans():
         self.files = files
 
     #can be moved to utils
-    def get_loader(self, batch_size):
+    def get_loader(self, batch_size, folder=None, files=None):
         """
         Returns a DataLoader for review embeddings, on the basis of
         a set of files.
@@ -49,7 +49,12 @@ class ReviewKMeans():
             folder (str):                   name of folder that holds files
             files (str []):                 list of embedding filenames
         """
-        dataset = ReviewDataset(self.utils.folder, files, 'emb')
+        if files is None:
+            raise ValueError("No files provided.")
+        if folder is None:
+            folder = self.utils.folder
+        
+        dataset = ReviewDataset(folder, files, 'emb')
         self.loader = DataLoader(dataset, batch_size=batch_size)
 
         return self.loader
