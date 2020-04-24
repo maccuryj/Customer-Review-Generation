@@ -48,11 +48,15 @@ class ReviewKMeans():
             folder (str):                   name of folder that holds files
             files (str []):                 list of embedding filenames
         """
-        if files is None and self.files is None:
-            raise ValueError("No files provided.")
+        if files is None:            
+            if self.files is None:
+                raise ValueError("No files provided.")
+            else:
+                files = self.files
+
         if folder is None:
             folder = self.utils.data_folder
-        
+                
         dataset = ReviewDataset(folder, files, 'emb')
         self.loader = DataLoader(dataset, batch_size=batch_size)
 
@@ -74,8 +78,7 @@ class ReviewKMeans():
         curr_file = ""
         for files, batch in loader:
             preds = clustering.predict(batch)
-            for j in range(len(files)):
-                print(i)
+            for j in range(len(files)):                
                 #Reset index when changing file
                 if files[j] != curr_file:
                     curr_file = files[j]
