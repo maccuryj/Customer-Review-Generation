@@ -49,7 +49,7 @@ class ReviewKMeans():
             folder (str):                   name of folder that holds files
             files (str []):                 list of embedding filenames
         """
-        dataset = ReviewDataset(self.utils.folder, self.utils.files, 'emb')
+        dataset = ReviewDataset(self.utils.folder, files, 'emb')
         self.loader = DataLoader(dataset, batch_size=batch_size)
 
         return self.loader
@@ -85,7 +85,7 @@ class ReviewKMeans():
         return cluster_dict      
 
     #TODO: loader has to be passed or separate to have a computation function
-    def MB_Spherical_KMeans(self, k, batch_size=2048, save_model=True, save_labels=True, fn_model='KMeansModel.joblib', fn_labels='ClusterDict.joblib'):
+    def MB_Spherical_KMeans(self, k, loader, batch_size=2048, save_model=True, save_labels=True, fn_model='KMeansModel.joblib', fn_labels='ClusterDict.joblib'):
         """
         MiniBatchKMeans model, clustering the normalized BERT Embeddings.
         
@@ -94,8 +94,7 @@ class ReviewKMeans():
             batch_size (int):               Size of batches returned by the dataloader
             save_model (bool):              Decides whether model should be saved
             save_labels (bool):             Decides whether cluster labels should be saved
-        """
-        loader = self.get_loader(batch_size)        
+        """                
         clustering = MiniBatchKMeans(n_clusters=k, batch_size=batch_size)
 
         for f, batch in loader:
@@ -109,8 +108,8 @@ class ReviewKMeans():
 
         return clustering, cluster_dict
 
-    #TODO: Loader has to be passed
-    def elbow_plot(self, min_k=20, max_k=300, step=20, notification_step=100, batch_size=2048):
+    
+    def elbow_plot(self, loader, min_k=20, max_k=300, step=20, notification_step=100, batch_size=2048):
         """
         Creates an elbow plot for the KMeans clustering
         based on the provided K values
@@ -124,8 +123,7 @@ class ReviewKMeans():
             batch_size (int):
         """
         ssq = []
-        n_steps = (max_k-min_k)/step
-        loader = self.get_loader(batch_size) 
+        n_steps = (max_k-min_k)/step        
 
         for k in range(min_k, max_k, step):
             if k % notification_step == 0:
