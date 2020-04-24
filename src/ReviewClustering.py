@@ -52,7 +52,7 @@ class ReviewKMeans():
         if files is None and self.files is None:
             raise ValueError("No files provided.")
         if folder is None:
-            folder = self.utils.folder
+            folder = self.utils.data_folder
         
         dataset = ReviewDataset(folder, files, 'emb')
         self.loader = DataLoader(dataset, batch_size=batch_size)
