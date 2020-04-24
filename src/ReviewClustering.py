@@ -10,8 +10,7 @@ from matplotlib import pyplot as plt
 import seaborn as sns
 sns.set(rc={'figure.figsize':(11.7,8.27)})
 
-from ReviewUtils import ReviewUtils
-from ReviewLoader import ReviewDataset
+from ReviewUtils import ReviewUtils, ReviewDataset
 
 class ReviewKMeans():
     """
