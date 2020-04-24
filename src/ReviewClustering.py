@@ -49,7 +49,7 @@ class ReviewKMeans():
             folder (str):                   name of folder that holds files
             files (str []):                 list of embedding filenames
         """
-        if files is None:
+        if files is None and self.files is None:
             raise ValueError("No files provided.")
         if folder is None:
             folder = self.utils.folder
