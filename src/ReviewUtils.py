@@ -70,6 +70,7 @@ class ReviewDataset(IterableDataset):
             self.files = files
         else:
             self.files = [files]
+        print(files)
         self.ds_type = ds_type
 
     def parse_file(self, file):
