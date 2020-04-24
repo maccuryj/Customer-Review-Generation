@@ -76,6 +76,9 @@ class ReviewDataset(IterableDataset):
         # Return embeddings from .npy and their respective file
         # Used for KMeans clustering
         if self.ds_type is 'emb':
+            print(self.folder)
+            print(file)
+            print(os.path.join(self.folder, file))
             embeddings = np.load(os.path.join(self.folder, file))
             for emb in embeddings:
                 yield file, emb
