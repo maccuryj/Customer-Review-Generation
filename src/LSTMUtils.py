@@ -54,7 +54,6 @@ class Model:
                 "batch_size": batch_size,
                 "embed_method": self.embedder.method,
 
-                "h_learnable": self.h_learnable,
                 "input_size": self.embedder.embedding_dim,
                 "output_size": self.embedder.num_embeddings, # = dict_size
                 "hidden_size": self.model.hidden_size,
@@ -82,7 +81,6 @@ class Model:
                 Y_padded = Y_padded.to(device=device)
                 batch_size = Y_padded.shape[0]
                 Y_padded = Y_padded.contiguous().view(-1)
-
 
                 if self.h_learnable:
                     out, h = self.model.predict(X_packed, h=None, batch_size=batch_size)
@@ -352,7 +350,7 @@ def save_reviews_in_gdrive(resource_folder, filename, reviews):
         writer = csv.writer(f)
         writer.writerows(reviews)
 
-def load_model_from_checkpoint(checkpoint, lstmClass, modelClass, embedderClass):
+def load_model_from_checkpoint(checkpoint, h_learnable, lstmClass, modelClass, embedderClass):
     """
     Load a pytorch-model from gdrive and setup the wrapper class Model such 
     that one can conveniently continue training.
@@ -391,7 +389,7 @@ def load_model_from_checkpoint(checkpoint, lstmClass, modelClass, embedderClass)
     criterion = nn.CrossEntropyLoss(ignore_index=0)
 
     # Set up Model Wrapper Class
-    model = modelClass(lstm, params['h_learnable'], optimizer, criterion, embedder)
+    model = modelClass(lstm, h_learnable, optimizer, criterion, embedder)
     model.train_losses = params['train_losses']
     model.test_losses = params['test_losses']
     model.reviews = params['reviews']
